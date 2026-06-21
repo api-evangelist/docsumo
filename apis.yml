@@ -1,0 +1,122 @@
+aid: docsumo
+url: https://raw.githubusercontent.com/api-evangelist/docsumo/refs/heads/main/apis.yml
+name: Docsumo
+kind: company
+description: Docsumo is an intelligent document processing (IDP) platform that uses
+  OCR, computer vision, and machine learning to convert unstructured documents -
+  invoices, bank statements, pay stubs, receipts, tax forms - into structured,
+  validated data. The REST API at https://app.docsumo.com/api/v1 uploads documents,
+  retrieves AI-extracted data, supports human-in-the-loop review, and emits
+  webhooks as documents finish processing.
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+tags:
+- Document Processing
+- IDP
+- OCR
+- Data Extraction
+- AI
+created: '2026-06-21'
+modified: '2026-06-21'
+specificationVersion: '0.19'
+apis:
+- aid: docsumo:docsumo-documents-extraction-api
+  name: Docsumo Documents & Extraction API
+  tags:
+  - Documents
+  - Upload
+  - Extraction
+  - OCR
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://support.docsumo.com/reference/getting-started-with-your-api
+  baseURL: https://app.docsumo.com/api/v1
+  properties:
+  - url: https://support.docsumo.com/docs/using-docsumo-api
+    type: Documentation
+  - url: https://support.docsumo.com/reference/getting-started-with-your-api
+    type: APIReference
+  - url: openapi/docsumo-openapi.yml
+    type: OpenAPI
+  - url: collections/docsumo.postman_collection.json
+    type: Postman
+  description: Upload documents (multipart file, or URL/Base64), list and summarize
+    documents, fetch document detail, and retrieve AI-extracted structured data and
+    line-item tables for a given document.
+- aid: docsumo:docsumo-document-types-api
+  name: Docsumo Document Types API
+  tags:
+  - Document Types
+  - Models
+  - Configuration
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://support.docsumo.com/docs/document-type-web-api-and-email-limit
+  baseURL: https://app.docsumo.com/api/v1
+  properties:
+  - url: https://support.docsumo.com/docs/using-docsumo-api
+    type: Documentation
+  - url: https://support.docsumo.com/reference/getting-started-with-your-api
+    type: APIReference
+  - url: openapi/docsumo-openapi.yml
+    type: OpenAPI
+  - url: collections/docsumo.postman_collection.json
+    type: Postman
+  description: Lists the document types enabled on the account (invoices, bank
+    statements, pay stubs, receipts, and custom-trained types) and the user/account
+    detail and credit limits used when classifying and routing uploads.
+- aid: docsumo:docsumo-review-validation-api
+  name: Docsumo Review & Validation API
+  tags:
+  - Review
+  - Validation
+  - Human in the Loop
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://support.docsumo.com/reference/getting-started-with-your-api
+  baseURL: https://app.docsumo.com/api/v1
+  properties:
+  - url: https://support.docsumo.com/docs/using-docsumo-api
+    type: Documentation
+  - url: https://support.docsumo.com/reference/getting-started-with-your-api
+    type: APIReference
+  - url: openapi/docsumo-openapi.yml
+    type: OpenAPI
+  - url: collections/docsumo.postman_collection.json
+    type: Postman
+  description: Generates hosted review URLs for human-in-the-loop validation, updates
+    document review status, and deletes documents once processing and review are
+    complete.
+- aid: docsumo:docsumo-webhooks-api
+  name: Docsumo Webhooks API
+  tags:
+  - Webhooks
+  - Events
+  - Callbacks
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://support.docsumo.com/docs/webhook-1
+  baseURL: https://app.docsumo.com/api/v1
+  properties:
+  - url: https://support.docsumo.com/docs/webhook-1
+    type: Documentation
+  - url: https://support.docsumo.com/docs/webhook-url-1
+    type: Documentation
+  - url: review.yml
+    type: Review
+  description: Account-configured webhook callbacks that POST a JSON payload to your
+    endpoint when a document changes processing status (uploaded, processed,
+    reviewed), carrying document identifiers and status for downstream automation.
+common:
+- type: GitHubOrganization
+  url: https://github.com/docsumo
+- type: LinkedIn
+  url: https://www.linkedin.com/company/docsumo
+- type: Website
+  url: https://www.docsumo.com
+- type: Documentation
+  url: https://support.docsumo.com/reference/getting-started-with-your-api
+- type: Plans
+  url: plans/docsumo-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/docsumo-rate-limits.yml
+- type: FinOps
+  url: finops/docsumo-finops.yml
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

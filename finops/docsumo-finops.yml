@@ -1,0 +1,96 @@
+specification: FinOps Framework
+specificationVersion: '1.0'
+schema: https://www.finops.org/framework/
+provider: Docsumo
+providerId: docsumo
+created: '2026-06-21'
+modified: '2026-06-21'
+reconciled: false
+tags:
+- Document Processing
+- IDP
+- OCR
+- Data Extraction
+- AI
+- FinOps
+- Cost Management
+- FOCUS
+description: >-
+  FinOps view of Docsumo spend. Docsumo bills on a sales-led subscription with
+  a per-document / per-page volume model: a committed monthly volume per plan,
+  metered by documents (and pages) processed across enabled document types,
+  with custom-trained types and review automation factored into the contract.
+  Exact per-document rates are not published and are not reconciled here.
+notes: >-
+  Per-document and per-page rates are quoted by sales and vary by volume and
+  document type; verify the metered unit (document vs. page), overage rates,
+  and included volume during reconciliation.
+sources:
+- https://www.docsumo.com/pricing
+- https://support.docsumo.com/docs/document-type-web-api-and-email-limit
+- https://focus.finops.org/focus-specification/v1-3/
+alignedWith:
+  framework: FinOps Foundation Framework
+  frameworkUrl: https://www.finops.org/framework/
+  dataSpec: FOCUS
+  dataSpecVersion: '1.3'
+  dataSpecUrl: https://focus.finops.org/focus-specification/v1-3/
+publisherName: Docsumo
+serviceCategory: AI and Machine Learning
+billingModel:
+  pricingCategory: Subscription-Based
+  billingFrequency: Monthly
+  billingCurrency: USD
+  chargeCategories:
+  - Usage
+  - Purchase
+  - Adjustment
+focusColumns:
+  ServiceName: Docsumo
+  ServiceCategory: AI and Machine Learning
+  ProviderName: Docsumo
+  PublisherName: Docsumo
+  InvoiceIssuerName: Docsumo
+  BillingCurrency: USD
+  ChargeCategory: Usage
+  PricingCategory: Subscription-Based
+meters:
+- name: documents_processed
+  description: Documents uploaded and processed for extraction, the primary billed unit, counted against the plan's committed monthly volume.
+  unit: documents
+  aggregation: sum
+  dimensions:
+  - account
+  - document_type
+- name: pages_processed
+  description: Pages within processed documents, where volume and overage are metered per page rather than per document.
+  unit: pages
+  aggregation: sum
+  dimensions:
+  - account
+  - document_type
+- name: documents_overage
+  description: Documents/pages processed beyond the committed monthly plan volume, billed at the contracted overage rate.
+  unit: documents
+  aggregation: sum
+  dimensions:
+  - account
+  - document_type
+- name: custom_document_types
+  description: Custom-trained document types enabled on the account, contributing to plan and contract cost.
+  unit: types
+  aggregation: max
+  dimensions:
+  - account
+principles:
+- name: Visibility
+  description: Track documents and pages processed per document type from the account dashboard and reconcile against the committed plan volume.
+- name: Allocation
+  description: Tag API keys and document types per workload/team and map processed-document counts to internal cost centers.
+- name: Optimization
+  description: Match the committed volume tier to actual throughput to avoid overage; consolidate document types; route only documents requiring it through human review.
+- name: Accountability
+  description: Assign owners per integration/key and review monthly document volume against budget and contract commitments.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

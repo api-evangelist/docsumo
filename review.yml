@@ -1,0 +1,91 @@
+aid: docsumo
+name: Docsumo
+review:
+  question: Does Docsumo expose a documented public WebSocket or streaming API, or is asynchronous delivery handled by webhooks?
+  answer: false
+  date: '2026-06-21'
+  reviewer: API Evangelist
+  asyncapiSpecCreated: false
+  asyncapiScopeNote: |
+    Docsumo's only asynchronous surface is outbound HTTP webhooks configured
+    in the account dashboard (Settings > Webhook/API). There is no documented
+    public WebSocket (ws:// or wss://) endpoint and no Server-Sent Events (SSE)
+    stream on the REST API. Document processing is asynchronous: the client
+    uploads via REST, polls document status/detail via REST, and/or receives a
+    webhook callback when status changes. Because the async transport is a
+    plain outbound HTTP POST callback (not a subscribe-style streaming
+    channel), no AsyncAPI document was authored; the webhook contract is
+    described here and in apis.yml instead.
+findings:
+  summary: |
+    Docsumo does not publish a documented public WebSocket or SSE streaming
+    API. The platform exposes a synchronous REST API under
+    https://app.docsumo.com/api/v1 (apikey / X-API-KEY header) for upload,
+    listing, extraction retrieval, review, and deletion. Asynchronous
+    completion is delivered through account-configured webhooks that POST a
+    JSON payload to a customer endpoint when a document's processing/review
+    status changes. The webhook URL and events are configured in the Docsumo
+    dashboard rather than via an API call.
+  transports:
+    - protocol: REST
+      scheme: https
+      baseURL: https://app.docsumo.com/api/v1
+      documented: true
+    - protocol: Webhook
+      scheme: https
+      note: Outbound HTTP POST callbacks to a customer-configured URL on document status change (uploaded, processed, reviewed). Configured in the dashboard.
+      documented: true
+    - protocol: WebSocket
+      scheme: wss
+      documented: false
+      note: No WebSocket endpoint is documented in the Docsumo API reference or support docs as of the review date.
+    - protocol: SSE
+      scheme: https
+      documented: false
+      note: No Server-Sent Events streaming is documented on any REST endpoint.
+  endpointsConfirmedRest:
+    - POST   https://app.docsumo.com/api/v1/eevee/apikey/upload/
+    - POST   https://app.docsumo.com/api/v1/eevee/apikey/upload/custom/
+    - GET    https://app.docsumo.com/api/v1/eevee/apikey/documents/
+    - GET    https://app.docsumo.com/api/v1/eevee/apikey/documents/summary/
+    - GET    https://app.docsumo.com/api/v1/eevee/apikey/documents/{doc_id}/detail/
+    - DELETE https://app.docsumo.com/api/v1/eevee/apikey/documents/{doc_id}/
+    - GET    https://app.docsumo.com/api/v1/eevee/apikey/documents/{doc_id}/review-url/
+    - PATCH  https://app.docsumo.com/api/v1/eevee/apikey/documents/{doc_id}/review-status/
+    - GET    https://app.docsumo.com/api/v1/eevee/apikey/user/document-types/
+    - GET    https://app.docsumo.com/api/v1/eevee/apikey/user/detail/
+  webhook:
+    configuredAt: https://app.docsumo.com/settings/webhook-api/
+    delivery: HTTP POST to customer-configured URL
+    events:
+      - document uploaded
+      - document processing status change
+      - document processed / extraction complete
+      - document reviewed
+    payloadFields:
+      - document identifier (doc_id / user_doc_id)
+      - document type
+      - processing/review status
+      - extracted data reference or summary
+    security: Secure the receiving endpoint with HTTPS and request validation; configured per account.
+sources:
+  - url: https://support.docsumo.com/reference/getting-started-with-your-api
+    type: APIReference
+    note: API reference; all documented endpoints are HTTPS REST under app.docsumo.com/api/v1. No WebSocket mentioned.
+  - url: https://support.docsumo.com/docs/using-docsumo-api
+    type: Documentation
+    note: Describes upload (POST), status check (GET), results retrieval (GET), update (PATCH/PUT), and webhooks for automation.
+  - url: https://support.docsumo.com/docs/webhook-1
+    type: Documentation
+    note: Webhooks triggered on document upload, processing status change, and extraction results; configured in account settings.
+  - url: https://support.docsumo.com/docs/webhook-url-1
+    type: Documentation
+    note: Webhook URL configuration; multiple URLs and per-URL events supported.
+actions:
+  asyncapiPath: null
+  apisYmlUpdated: true
+  reason: |
+    No WebSocket or SSE streaming surface exists, so no AsyncAPI document was
+    authored. The asynchronous webhook contract (events, payload, config
+    location) is captured in this review and surfaced as the Docsumo Webhooks
+    API entry in apis.yml.

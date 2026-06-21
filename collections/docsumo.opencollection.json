@@ -1,0 +1,172 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Docsumo API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "apikey",
+      "value": "{{apiKey}}",
+      "in": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Documents",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Upload a document file",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://app.docsumo.com/api/v1/eevee/apikey/upload/",
+            "body": {
+              "type": "multipart-form",
+              "data": []
+            }
+          },
+          "docs": "Uploads a document file for processing and classifies it to the provided type."
+        },
+        {
+          "info": {
+            "name": "Upload a document by URL or Base64",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://app.docsumo.com/api/v1/eevee/apikey/upload/custom/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Uploads a document by remote URL or inline Base64-encoded content."
+        },
+        {
+          "info": {
+            "name": "List documents",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.docsumo.com/api/v1/eevee/apikey/documents/"
+          },
+          "docs": "Returns a paginated list of documents with processing status."
+        },
+        {
+          "info": {
+            "name": "Documents summary",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.docsumo.com/api/v1/eevee/apikey/documents/summary/"
+          },
+          "docs": "Returns aggregate counts of documents by processing status."
+        },
+        {
+          "info": {
+            "name": "Delete a document",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://app.docsumo.com/api/v1/eevee/apikey/documents/{doc_id}/"
+          },
+          "docs": "Permanently deletes the document and its extracted data."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Extraction",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get document detail and extracted data",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.docsumo.com/api/v1/eevee/apikey/documents/{doc_id}/detail/"
+          },
+          "docs": "Returns document metadata with AI-extracted fields and line-item tables."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Review",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get hosted review URL",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.docsumo.com/api/v1/eevee/apikey/documents/{doc_id}/review-url/"
+          },
+          "docs": "Returns a hosted, shareable URL for operator review of extracted data."
+        },
+        {
+          "info": {
+            "name": "Update document review status",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://app.docsumo.com/api/v1/eevee/apikey/documents/{doc_id}/review-status/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates the review/processing status of a document."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Document Types",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List enabled document types",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.docsumo.com/api/v1/eevee/apikey/user/document-types/"
+          },
+          "docs": "Returns the document types enabled on the account."
+        },
+        {
+          "info": {
+            "name": "Get account detail and credit limits",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.docsumo.com/api/v1/eevee/apikey/user/detail/"
+          },
+          "docs": "Returns account details and current credit limit and usage."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

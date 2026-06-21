@@ -1,0 +1,576 @@
+{
+  "item": [
+    {
+      "id": "b1f0a001-0001-4001-8001-000000000001",
+      "name": "Documents",
+      "description": {
+        "content": "Upload, list, summarize, and delete documents.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "b1f0a001-0002-4001-8001-000000000002",
+          "name": "Upload a document file",
+          "request": {
+            "name": "Upload a document file",
+            "description": {
+              "content": "Uploads a document file for processing and classifies it to the provided type.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "eevee",
+                "apikey",
+                "upload",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "multipart/form-data"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "type",
+                  "type": "text",
+                  "value": "invoice"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "b1f0a001-0003-4001-8001-000000000003",
+              "name": "OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"doc_id\": \"<string>\",\n    \"type\": \"invoice\",\n    \"status\": \"new\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "b1f0a001-0004-4001-8001-000000000004",
+          "name": "Upload a document by URL or Base64",
+          "request": {
+            "name": "Upload a document by URL or Base64",
+            "description": {
+              "content": "Uploads a document by remote URL or inline Base64-encoded content.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "eevee",
+                "apikey",
+                "upload",
+                "custom",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"invoice\",\n  \"url\": \"https://example.com/invoice.pdf\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "b1f0a001-0005-4001-8001-000000000005",
+          "name": "List documents",
+          "request": {
+            "name": "List documents",
+            "description": {
+              "content": "Returns a paginated list of documents with processing status.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "eevee",
+                "apikey",
+                "documents",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null,
+            "body": {}
+          },
+          "response": [],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "b1f0a001-0006-4001-8001-000000000006",
+          "name": "Documents summary",
+          "request": {
+            "name": "Documents summary",
+            "description": {
+              "content": "Returns aggregate counts of documents by processing status.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "eevee",
+                "apikey",
+                "documents",
+                "summary",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null,
+            "body": {}
+          },
+          "response": [],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "b1f0a001-0007-4001-8001-000000000007",
+          "name": "Delete a document",
+          "request": {
+            "name": "Delete a document",
+            "description": {
+              "content": "Permanently deletes the document and its extracted data.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "eevee",
+                "apikey",
+                "documents",
+                ":doc_id",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "doc_id",
+                  "value": "<string>"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "DELETE",
+            "auth": null,
+            "body": {}
+          },
+          "response": [],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    },
+    {
+      "id": "b1f0a002-0001-4001-8001-000000000001",
+      "name": "Extraction",
+      "description": {
+        "content": "Retrieve AI-extracted data for a processed document.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "b1f0a002-0002-4001-8001-000000000002",
+          "name": "Get document detail and extracted data",
+          "request": {
+            "name": "Get document detail and extracted data",
+            "description": {
+              "content": "Returns document metadata with AI-extracted fields and line-item tables.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "eevee",
+                "apikey",
+                "documents",
+                ":doc_id",
+                "detail",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "doc_id",
+                  "value": "<string>"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null,
+            "body": {}
+          },
+          "response": [
+            {
+              "id": "b1f0a002-0003-4001-8001-000000000003",
+              "name": "OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"doc_id\": \"<string>\",\n    \"type\": \"invoice\",\n    \"status\": \"processed\",\n    \"fields\": [\n      {\n        \"label\": \"invoice_number\",\n        \"value\": \"INV-1001\",\n        \"confidence\": 0.98\n      }\n    ],\n    \"tables\": []\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    },
+    {
+      "id": "b1f0a003-0001-4001-8001-000000000001",
+      "name": "Review",
+      "description": {
+        "content": "Human-in-the-loop review URLs and review status.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "b1f0a003-0002-4001-8001-000000000002",
+          "name": "Get hosted review URL",
+          "request": {
+            "name": "Get hosted review URL",
+            "description": {
+              "content": "Returns a hosted, shareable URL for operator review of extracted data.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "eevee",
+                "apikey",
+                "documents",
+                ":doc_id",
+                "review-url",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "doc_id",
+                  "value": "<string>"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null,
+            "body": {}
+          },
+          "response": [],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "b1f0a003-0003-4001-8001-000000000003",
+          "name": "Update document review status",
+          "request": {
+            "name": "Update document review status",
+            "description": {
+              "content": "Updates the review/processing status of a document.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "eevee",
+                "apikey",
+                "documents",
+                ":doc_id",
+                "review-status",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "doc_id",
+                  "value": "<string>"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"reviewed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    },
+    {
+      "id": "b1f0a004-0001-4001-8001-000000000001",
+      "name": "Document Types",
+      "description": {
+        "content": "Enabled document types and account detail.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "b1f0a004-0002-4001-8001-000000000002",
+          "name": "List enabled document types",
+          "request": {
+            "name": "List enabled document types",
+            "description": {
+              "content": "Returns the document types enabled on the account.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "eevee",
+                "apikey",
+                "user",
+                "document-types",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null,
+            "body": {}
+          },
+          "response": [],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "b1f0a004-0003-4001-8001-000000000003",
+          "name": "Get account detail and credit limits",
+          "request": {
+            "name": "Get account detail and credit limits",
+            "description": {
+              "content": "Returns account details and current credit limit and usage.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "eevee",
+                "apikey",
+                "user",
+                "detail",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null,
+            "body": {}
+          },
+          "response": [],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://app.docsumo.com/api/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "apikey"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "d0c5a000-0000-4000-8000-000000000000",
+    "name": "Docsumo API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Docsumo intelligent document processing API. Auth via the apikey (X-API-KEY) header.\n\nContact Support:\n Docsumo Support\n https://support.docsumo.com/reference/getting-started-with-your-api",
+      "type": "text/plain"
+    }
+  }
+}

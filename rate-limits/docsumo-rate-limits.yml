@@ -1,0 +1,66 @@
+specification: API Commons Rate Limits
+specificationVersion: '0.1'
+schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/RateLimits
+provider: Docsumo
+providerId: docsumo
+created: '2026-06-21'
+modified: '2026-06-21'
+reconciled: false
+tags:
+- Document Processing
+- IDP
+- OCR
+- Data Extraction
+- AI
+- Rate Limiting
+- Quotas
+- Throttling
+description: >-
+  Docsumo enforces per-account limits on API upload throughput and on the
+  number of documents/pages that can be processed, scoped by plan. Documented
+  limits include web, API, and email upload caps per document type and overall
+  monthly document/page volume tied to the subscription. Specific numeric
+  request-per-minute and per-document-type values are not reconciled in this
+  artifact and should be confirmed in the account dashboard.
+notes: >-
+  Verify per-document-type API/web/email upload limits and monthly volume caps
+  on reconciliation; values vary by plan tier and contract.
+sources:
+- https://support.docsumo.com/docs/document-type-web-api-and-email-limit
+- https://support.docsumo.com/reference/getting-started-with-your-api
+responseCodes:
+  throttled: 429
+limits:
+- name: API Upload Limit
+  scope: account
+  metric: documents
+  limit: see provider documentation
+  notes: Per-document-type cap on documents uploaded via the API; varies by plan.
+- name: Web Upload Limit
+  scope: account
+  metric: documents
+  limit: see provider documentation
+  notes: Per-document-type cap on documents uploaded via the web UI; varies by plan.
+- name: Email Upload Limit
+  scope: account
+  metric: documents
+  limit: see provider documentation
+  notes: Per-document-type cap on documents uploaded via email ingestion; varies by plan.
+- name: Monthly Document Volume
+  scope: account
+  metric: documents
+  limit: see provider documentation
+  notes: Committed monthly document/page volume tied to the subscription plan.
+- name: Concurrent Processing
+  scope: account
+  metric: requests
+  limit: see provider documentation
+  notes: Throughput for in-flight document processing; varies by plan.
+policies:
+- name: Plan-Based Limits
+  description: Upload and volume limits scale with the subscription tier and are higher on Enterprise agreements.
+- name: Backoff Strategy
+  description: Clients should implement exponential backoff with jitter on 429 responses and honor Retry-After when present.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

@@ -1,0 +1,101 @@
+specification: API Commons Plans
+specificationVersion: '0.1'
+schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/Plans
+provider: Docsumo
+providerId: docsumo
+created: '2026-06-21'
+modified: '2026-06-21'
+reconciled: false
+tags:
+- Document Processing
+- IDP
+- OCR
+- Data Extraction
+- AI
+- Plans
+description: >-
+  Docsumo pricing is sales-led. The platform is sold via packaged tiers
+  (commonly a Growth/Business tier and an Enterprise tier) plus custom plans,
+  metered primarily on document/page volume processed and the document types
+  and custom models enabled. Published per-page or per-document rates are not
+  reconciled here because list pricing is gated behind contact-sales and varies
+  by volume, document type, and review/automation requirements.
+notes: >-
+  Engage Docsumo sales for a quote; confirm the document/page volume model,
+  overage rates, included document types, and seat counts during reconciliation.
+sources:
+- https://www.docsumo.com/pricing
+- https://support.docsumo.com/docs/document-type-web-api-and-email-limit
+plans:
+- id: docsumo-trial
+  name: Free Trial
+  type: trial
+  description: >-
+    Time- and volume-limited evaluation access to upload documents and inspect
+    extracted data before committing to a paid plan.
+  entries:
+  - label: Trial Documents
+    name: trial_documents
+    type: usage
+    metric: documents
+    limit: -1
+    timeFrame: month
+    geo: global
+    unit: 1
+    price: included during trial
+    userMultiplied: false
+  elements:
+  - name: Document Upload
+  - name: Data Extraction
+  - name: Review
+- id: docsumo-growth
+  name: Growth / Business
+  type: subscription
+  description: >-
+    Packaged subscription tier with a committed monthly document/page volume,
+    a set of enabled document types, hosted review, and API and webhook access.
+    Pricing is quoted by Docsumo sales.
+  entries:
+  - label: Document Volume
+    name: document_volume
+    type: usage
+    metric: documents
+    limit: -1
+    timeFrame: month
+    geo: global
+    unit: 1
+    price: contact sales
+    userMultiplied: false
+  elements:
+  - name: Document Upload
+  - name: Data Extraction
+  - name: Review
+  - name: Document Types
+  - name: Webhooks
+  - name: API Access
+- id: docsumo-enterprise
+  name: Enterprise
+  type: enterprise
+  description: >-
+    Custom volume commitments, custom-trained document types, SSO, advanced
+    review workflows, security/compliance, and dedicated support under a
+    negotiated agreement. Contact Docsumo sales.
+  entries:
+  - label: Enterprise Agreement
+    name: enterprise
+    type: flat
+    metric: contract
+    limit: -1
+    timeFrame: year
+    geo: global
+    unit: 1
+    price: contact sales
+    userMultiplied: false
+  elements:
+  - name: Custom Volume Pricing
+  - name: Custom Document Types
+  - name: SSO
+  - name: Dedicated Support
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com
