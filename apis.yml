@@ -103,6 +103,10 @@ apis:
     endpoint when a document changes processing status (uploaded, processed,
     reviewed), carrying document identifiers and status for downstream automation.
 common:
+- type: DomainSecurity
+  url: security/docsumo-domain-security.yml
+- type: Authentication
+  url: authentication/docsumo-authentication.yml
 - type: GitHubOrganization
   url: https://github.com/docsumo
 - type: LinkedIn

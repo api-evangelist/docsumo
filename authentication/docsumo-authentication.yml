@@ -1,0 +1,17 @@
+generated: '2026-07-11'
+method: derived
+source: openapi/docsumo-openapi.yml
+summary:
+  types:
+  - apiKey
+  api_key_in:
+  - header
+schemes:
+- name: apiKeyAuth
+  type: apiKey
+  in: header
+  parameter: apikey
+  description: Personal API key from https://app.docsumo.com/settings/webhook-api/. Also accepted
+    as the `X-API-KEY` header.
+  sources:
+  - openapi/docsumo-openapi.yml
