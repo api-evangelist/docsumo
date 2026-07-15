@@ -103,6 +103,8 @@ apis:
     endpoint when a document changes processing status (uploaded, processed,
     reviewed), carrying document identifiers and status for downstream automation.
 common:
+- type: AgenticAccess
+  url: agentic-access/docsumo-agentic-access.yml
 - type: DomainSecurity
   url: security/docsumo-domain-security.yml
 - type: Authentication
