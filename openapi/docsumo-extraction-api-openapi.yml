@@ -1,0 +1,124 @@
+openapi: 3.0.1
+info:
+  title: Docsumo Document Types Extraction API
+  description: REST API for the Docsumo intelligent document processing (IDP) platform. Upload documents, retrieve AI-extracted structured data and line-item tables, run human-in-the-loop review, manage document types, and delete documents. Authentication uses a personal API key passed in the `apikey` request header (also documented as `X-API-KEY`), obtainable from https://app.docsumo.com/settings/webhook-api/. Asynchronous completion is delivered via account-configured webhooks.
+  termsOfService: https://www.docsumo.com/terms-conditions
+  contact:
+    name: Docsumo Support
+    url: https://support.docsumo.com/reference/getting-started-with-your-api
+  version: '1.0'
+servers:
+- url: https://app.docsumo.com/api/v1
+  description: Docsumo production API
+security:
+- apiKeyAuth: []
+tags:
+- name: Extraction
+  description: Retrieve AI-extracted data for a processed document.
+paths:
+  /eevee/apikey/documents/{doc_id}/detail/:
+    get:
+      operationId: getDocumentDetail
+      tags:
+      - Extraction
+      summary: Get document detail and extracted data
+      description: Returns the document metadata together with the AI-extracted fields and line-item tables for the given document. Available once the document has finished processing.
+      parameters:
+      - $ref: '#/components/parameters/DocId'
+      responses:
+        '200':
+          description: Document detail with extracted data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  schemas:
+    DocumentDetail:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+          properties:
+            doc_id:
+              type: string
+            type:
+              type: string
+            status:
+              type: string
+            documentType:
+              type: string
+            fields:
+              type: array
+              items:
+                $ref: '#/components/schemas/ExtractedField'
+            tables:
+              type: array
+              items:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  rows:
+                    type: array
+                    items:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/ExtractedField'
+    ExtractedField:
+      type: object
+      properties:
+        label:
+          type: string
+        value:
+          type: string
+        confidence:
+          type: number
+          format: float
+        position:
+          type: array
+          items:
+            type: number
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        error:
+          type: string
+        message:
+          type: string
+  responses:
+    Unauthorized:
+      description: Missing or invalid API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Document not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    DocId:
+      name: doc_id
+      in: path
+      required: true
+      description: Unique identifier of the document.
+      schema:
+        type: string
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: apikey
+      description: Personal API key from https://app.docsumo.com/settings/webhook-api/. Also accepted as the `X-API-KEY` header.

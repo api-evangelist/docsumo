@@ -1,0 +1,129 @@
+openapi: 3.0.1
+info:
+  title: Docsumo Document Types Review API
+  description: REST API for the Docsumo intelligent document processing (IDP) platform. Upload documents, retrieve AI-extracted structured data and line-item tables, run human-in-the-loop review, manage document types, and delete documents. Authentication uses a personal API key passed in the `apikey` request header (also documented as `X-API-KEY`), obtainable from https://app.docsumo.com/settings/webhook-api/. Asynchronous completion is delivered via account-configured webhooks.
+  termsOfService: https://www.docsumo.com/terms-conditions
+  contact:
+    name: Docsumo Support
+    url: https://support.docsumo.com/reference/getting-started-with-your-api
+  version: '1.0'
+servers:
+- url: https://app.docsumo.com/api/v1
+  description: Docsumo production API
+security:
+- apiKeyAuth: []
+tags:
+- name: Review
+  description: Human-in-the-loop review URLs and review status.
+paths:
+  /eevee/apikey/documents/{doc_id}/review-url/:
+    get:
+      operationId: getReviewUrl
+      tags:
+      - Review
+      summary: Get hosted review URL
+      description: Returns a hosted, shareable URL where an operator can review and correct the extracted data for the document in the Docsumo UI.
+      parameters:
+      - $ref: '#/components/parameters/DocId'
+      responses:
+        '200':
+          description: Hosted review URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewUrlResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /eevee/apikey/documents/{doc_id}/review-status/:
+    patch:
+      operationId: updateReviewStatus
+      tags:
+      - Review
+      summary: Update document review status
+      description: Updates the review/processing status of a document, for example to mark it as reviewed after human validation.
+      parameters:
+      - $ref: '#/components/parameters/DocId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - status
+              properties:
+                status:
+                  type: string
+                  description: New review status to set.
+                  example: reviewed
+      responses:
+        '200':
+          description: Review status updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  responses:
+    Unauthorized:
+      description: Missing or invalid API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Document not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    StatusResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+    ReviewUrlResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+          properties:
+            review_url:
+              type: string
+              format: uri
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        error:
+          type: string
+        message:
+          type: string
+  parameters:
+    DocId:
+      name: doc_id
+      in: path
+      required: true
+      description: Unique identifier of the document.
+      schema:
+        type: string
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: apikey
+      description: Personal API key from https://app.docsumo.com/settings/webhook-api/. Also accepted as the `X-API-KEY` header.

@@ -1,0 +1,109 @@
+openapi: 3.0.1
+info:
+  title: Docsumo Document Types API
+  description: REST API for the Docsumo intelligent document processing (IDP) platform. Upload documents, retrieve AI-extracted structured data and line-item tables, run human-in-the-loop review, manage document types, and delete documents. Authentication uses a personal API key passed in the `apikey` request header (also documented as `X-API-KEY`), obtainable from https://app.docsumo.com/settings/webhook-api/. Asynchronous completion is delivered via account-configured webhooks.
+  termsOfService: https://www.docsumo.com/terms-conditions
+  contact:
+    name: Docsumo Support
+    url: https://support.docsumo.com/reference/getting-started-with-your-api
+  version: '1.0'
+servers:
+- url: https://app.docsumo.com/api/v1
+  description: Docsumo production API
+security:
+- apiKeyAuth: []
+tags:
+- name: Document Types
+  description: Enabled document types and account detail.
+paths:
+  /eevee/apikey/user/document-types/:
+    get:
+      operationId: listDocumentTypes
+      tags:
+      - Document Types
+      summary: List enabled document types
+      description: Returns the document types enabled on the account, including built-in types (invoice, bank statement, pay stub, receipt) and custom-trained types, along with web/API/email upload limits.
+      responses:
+        '200':
+          description: Enabled document types.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentTypeList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /eevee/apikey/user/detail/:
+    get:
+      operationId: getUserDetail
+      tags:
+      - Document Types
+      summary: Get account detail and credit limits
+      description: Returns account details and current credit limit and usage.
+      responses:
+        '200':
+          description: Account detail and credits.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+components:
+  schemas:
+    DocumentTypeList:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentType'
+    DocumentType:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        enabled:
+          type: boolean
+    UserDetail:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+          properties:
+            email:
+              type: string
+            full_name:
+              type: string
+            credit_limit:
+              type: integer
+            credit_used:
+              type: integer
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        error:
+          type: string
+        message:
+          type: string
+  responses:
+    Unauthorized:
+      description: Missing or invalid API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: apikey
+      description: Personal API key from https://app.docsumo.com/settings/webhook-api/. Also accepted as the `X-API-KEY` header.
