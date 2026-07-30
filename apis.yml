@@ -8,7 +8,20 @@ description: Docsumo is an intelligent document processing (IDP) platform that u
   validated data. The REST API at https://app.docsumo.com/api/v1 uploads documents,
   retrieves AI-extracted data, supports human-in-the-loop review, and emits
   webhooks as documents finish processing.
-image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+accessModel:
+  pricing: freemium
+  onboarding: self-serve
+  trial: true
+  try_now: true
+  public: false
+  label: Freemium (free trial) · Self-serve signup
+  confidence: high
+  source:
+  - plans
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/docsumo.png
 tags:
 - Document Processing
 - IDP
@@ -19,70 +32,6 @@ created: '2026-06-21'
 modified: '2026-06-21'
 specificationVersion: '0.19'
 apis:
-- aid: docsumo:docsumo-documents-extraction-api
-  name: Docsumo Documents & Extraction API
-  tags:
-  - Documents
-  - Upload
-  - Extraction
-  - OCR
-  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-  humanURL: https://support.docsumo.com/reference/getting-started-with-your-api
-  baseURL: https://app.docsumo.com/api/v1
-  properties:
-  - url: https://support.docsumo.com/docs/using-docsumo-api
-    type: Documentation
-  - url: https://support.docsumo.com/reference/getting-started-with-your-api
-    type: APIReference
-  - url: openapi/docsumo-openapi.yml
-    type: OpenAPI
-  - url: collections/docsumo.postman_collection.json
-    type: Postman
-  description: Upload documents (multipart file, or URL/Base64), list and summarize
-    documents, fetch document detail, and retrieve AI-extracted structured data and
-    line-item tables for a given document.
-- aid: docsumo:docsumo-document-types-api
-  name: Docsumo Document Types API
-  tags:
-  - Document Types
-  - Models
-  - Configuration
-  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-  humanURL: https://support.docsumo.com/docs/document-type-web-api-and-email-limit
-  baseURL: https://app.docsumo.com/api/v1
-  properties:
-  - url: https://support.docsumo.com/docs/using-docsumo-api
-    type: Documentation
-  - url: https://support.docsumo.com/reference/getting-started-with-your-api
-    type: APIReference
-  - url: openapi/docsumo-openapi.yml
-    type: OpenAPI
-  - url: collections/docsumo.postman_collection.json
-    type: Postman
-  description: Lists the document types enabled on the account (invoices, bank
-    statements, pay stubs, receipts, and custom-trained types) and the user/account
-    detail and credit limits used when classifying and routing uploads.
-- aid: docsumo:docsumo-review-validation-api
-  name: Docsumo Review & Validation API
-  tags:
-  - Review
-  - Validation
-  - Human in the Loop
-  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-  humanURL: https://support.docsumo.com/reference/getting-started-with-your-api
-  baseURL: https://app.docsumo.com/api/v1
-  properties:
-  - url: https://support.docsumo.com/docs/using-docsumo-api
-    type: Documentation
-  - url: https://support.docsumo.com/reference/getting-started-with-your-api
-    type: APIReference
-  - url: openapi/docsumo-openapi.yml
-    type: OpenAPI
-  - url: collections/docsumo.postman_collection.json
-    type: Postman
-  description: Generates hosted review URLs for human-in-the-loop validation, updates
-    document review status, and deletes documents once processing and review are
-    complete.
 - aid: docsumo:docsumo-webhooks-api
   name: Docsumo Webhooks API
   tags:
@@ -99,9 +48,74 @@ apis:
     type: Documentation
   - url: review.yml
     type: Review
-  description: Account-configured webhook callbacks that POST a JSON payload to your
-    endpoint when a document changes processing status (uploaded, processed,
-    reviewed), carrying document identifiers and status for downstream automation.
+  description: >-
+    Account-configured webhook callbacks that POST a JSON payload to your endpoint when a document changes
+    processing status (uploaded, processed, reviewed), carrying document identifiers and status for downstream
+    automation.
+- aid: docsumo:docsumo-document-types-api
+  name: Docsumo Document Types API
+  description: Enabled document types and account detail.
+  humanURL: https://support.docsumo.com/reference/getting-started-with-your-api
+  baseURL: https://app.docsumo.com/api/v1
+  tags:
+  - Document Types
+  properties:
+  - type: OpenAPI
+    url: openapi/docsumo-document-types-api-openapi.yml
+  - type: Documentation
+    url: https://support.docsumo.com/docs/using-docsumo-api
+  - type: APIReference
+    url: https://support.docsumo.com/reference/getting-started-with-your-api
+  - type: Postman
+    url: collections/docsumo.postman_collection.json
+- aid: docsumo:docsumo-documents-api
+  name: Docsumo Documents API
+  description: Upload, list, summarize, and delete documents.
+  humanURL: https://support.docsumo.com/reference/getting-started-with-your-api
+  baseURL: https://app.docsumo.com/api/v1
+  tags:
+  - Documents
+  properties:
+  - type: OpenAPI
+    url: openapi/docsumo-documents-api-openapi.yml
+  - type: Documentation
+    url: https://support.docsumo.com/docs/using-docsumo-api
+  - type: APIReference
+    url: https://support.docsumo.com/reference/getting-started-with-your-api
+  - type: Postman
+    url: collections/docsumo.postman_collection.json
+- aid: docsumo:docsumo-extraction-api
+  name: Docsumo Extraction API
+  description: Retrieve AI-extracted data for a processed document.
+  humanURL: https://support.docsumo.com/reference/getting-started-with-your-api
+  baseURL: https://app.docsumo.com/api/v1
+  tags:
+  - Extraction
+  properties:
+  - type: OpenAPI
+    url: openapi/docsumo-extraction-api-openapi.yml
+  - type: Documentation
+    url: https://support.docsumo.com/docs/using-docsumo-api
+  - type: APIReference
+    url: https://support.docsumo.com/reference/getting-started-with-your-api
+  - type: Postman
+    url: collections/docsumo.postman_collection.json
+- aid: docsumo:docsumo-review-api
+  name: Docsumo Review API
+  description: Human-in-the-loop review URLs and review status.
+  humanURL: https://support.docsumo.com/reference/getting-started-with-your-api
+  baseURL: https://app.docsumo.com/api/v1
+  tags:
+  - Review
+  properties:
+  - type: OpenAPI
+    url: openapi/docsumo-review-api-openapi.yml
+  - type: Documentation
+    url: https://support.docsumo.com/docs/using-docsumo-api
+  - type: APIReference
+    url: https://support.docsumo.com/reference/getting-started-with-your-api
+  - type: Postman
+    url: collections/docsumo.postman_collection.json
 common:
 - type: AgenticAccess
   url: agentic-access/docsumo-agentic-access.yml
