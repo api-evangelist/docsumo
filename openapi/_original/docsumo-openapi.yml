@@ -1,0 +1,534 @@
+openapi: 3.0.1
+info:
+  title: Docsumo API
+  description: >-
+    REST API for the Docsumo intelligent document processing (IDP) platform.
+    Upload documents, retrieve AI-extracted structured data and line-item
+    tables, run human-in-the-loop review, manage document types, and delete
+    documents. Authentication uses a personal API key passed in the
+    `apikey` request header (also documented as `X-API-KEY`), obtainable from
+    https://app.docsumo.com/settings/webhook-api/. Asynchronous completion is
+    delivered via account-configured webhooks.
+  termsOfService: https://www.docsumo.com/terms-conditions
+  contact:
+    name: Docsumo Support
+    url: https://support.docsumo.com/reference/getting-started-with-your-api
+  version: '1.0'
+servers:
+  - url: https://app.docsumo.com/api/v1
+    description: Docsumo production API
+security:
+  - apiKeyAuth: []
+tags:
+  - name: Documents
+    description: Upload, list, summarize, and delete documents.
+  - name: Extraction
+    description: Retrieve AI-extracted data for a processed document.
+  - name: Review
+    description: Human-in-the-loop review URLs and review status.
+  - name: Document Types
+    description: Enabled document types and account detail.
+paths:
+  /eevee/apikey/upload/:
+    post:
+      operationId: uploadDocument
+      tags:
+        - Documents
+      summary: Upload a document file
+      description: >-
+        Uploads a document file (.pdf, .png, .jpg, .jpeg, .tiff, .tif, and
+        .xlsx for select financial types) for processing. The document is
+        classified to the provided `type` and queued for extraction.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+                - type
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The document file to upload.
+                type:
+                  type: string
+                  description: Document type to classify the upload as (e.g. invoice, bank_statement).
+                  example: invoice
+                user_doc_id:
+                  type: string
+                  description: Optional caller-supplied tracking identifier.
+                doc_meta_data:
+                  type: string
+                  description: Optional additional metadata encoded as a JSON string.
+                review_token:
+                  type: boolean
+                  description: When true, returns a shareable hosted review URL/token.
+      responses:
+        '200':
+          description: Document accepted and queued for processing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /eevee/apikey/upload/custom/:
+    post:
+      operationId: uploadDocumentCustom
+      tags:
+        - Documents
+      summary: Upload a document by URL or Base64
+      description: >-
+        Uploads a document by remote URL or inline Base64-encoded content
+        instead of a multipart file part. Useful for server-to-server
+        integrations that already hold the document bytes or a hosted URL.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - type
+              properties:
+                type:
+                  type: string
+                  description: Document type to classify the upload as.
+                  example: invoice
+                url:
+                  type: string
+                  format: uri
+                  description: Publicly reachable URL of the document to fetch and process.
+                file_data:
+                  type: string
+                  description: Base64-encoded document content (alternative to url).
+                file_name:
+                  type: string
+                  description: File name including extension when sending Base64 content.
+                user_doc_id:
+                  type: string
+                  description: Optional caller-supplied tracking identifier.
+      responses:
+        '200':
+          description: Document accepted and queued for processing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /eevee/apikey/documents/:
+    get:
+      operationId: listDocuments
+      tags:
+        - Documents
+      summary: List documents
+      description: >-
+        Returns a paginated list of documents on the account with their
+        processing status, optionally filtered by document type and status.
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of documents to return.
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          description: Number of documents to skip for pagination.
+          schema:
+            type: integer
+            default: 0
+        - name: status
+          in: query
+          description: Filter by processing status (e.g. new, processed, reviewed).
+          schema:
+            type: string
+        - name: doc_type
+          in: query
+          description: Filter by document type.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of documents.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /eevee/apikey/documents/summary/:
+    get:
+      operationId: documentsSummary
+      tags:
+        - Documents
+      summary: Documents summary
+      description: Returns aggregate counts of documents by processing status.
+      responses:
+        '200':
+          description: Document status summary.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentsSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /eevee/apikey/documents/{doc_id}/detail/:
+    get:
+      operationId: getDocumentDetail
+      tags:
+        - Extraction
+      summary: Get document detail and extracted data
+      description: >-
+        Returns the document metadata together with the AI-extracted fields
+        and line-item tables for the given document. Available once the
+        document has finished processing.
+      parameters:
+        - $ref: '#/components/parameters/DocId'
+      responses:
+        '200':
+          description: Document detail with extracted data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /eevee/apikey/documents/{doc_id}/:
+    delete:
+      operationId: deleteDocument
+      tags:
+        - Documents
+      summary: Delete a document
+      description: Permanently deletes the document and its extracted data.
+      parameters:
+        - $ref: '#/components/parameters/DocId'
+      responses:
+        '200':
+          description: Document deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /eevee/apikey/documents/{doc_id}/review-url/:
+    get:
+      operationId: getReviewUrl
+      tags:
+        - Review
+      summary: Get hosted review URL
+      description: >-
+        Returns a hosted, shareable URL where an operator can review and
+        correct the extracted data for the document in the Docsumo UI.
+      parameters:
+        - $ref: '#/components/parameters/DocId'
+      responses:
+        '200':
+          description: Hosted review URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewUrlResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /eevee/apikey/documents/{doc_id}/review-status/:
+    patch:
+      operationId: updateReviewStatus
+      tags:
+        - Review
+      summary: Update document review status
+      description: >-
+        Updates the review/processing status of a document, for example to
+        mark it as reviewed after human validation.
+      parameters:
+        - $ref: '#/components/parameters/DocId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  description: New review status to set.
+                  example: reviewed
+      responses:
+        '200':
+          description: Review status updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /eevee/apikey/user/document-types/:
+    get:
+      operationId: listDocumentTypes
+      tags:
+        - Document Types
+      summary: List enabled document types
+      description: >-
+        Returns the document types enabled on the account, including built-in
+        types (invoice, bank statement, pay stub, receipt) and custom-trained
+        types, along with web/API/email upload limits.
+      responses:
+        '200':
+          description: Enabled document types.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentTypeList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /eevee/apikey/user/detail/:
+    get:
+      operationId: getUserDetail
+      tags:
+        - Document Types
+      summary: Get account detail and credit limits
+      description: Returns account details and current credit limit and usage.
+      responses:
+        '200':
+          description: Account detail and credits.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+components:
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: apikey
+      description: >-
+        Personal API key from https://app.docsumo.com/settings/webhook-api/.
+        Also accepted as the `X-API-KEY` header.
+  parameters:
+    DocId:
+      name: doc_id
+      in: path
+      required: true
+      description: Unique identifier of the document.
+      schema:
+        type: string
+  responses:
+    BadRequest:
+      description: Invalid request parameters.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Missing or invalid API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Document not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    UploadResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            doc_id:
+              type: string
+              description: Identifier assigned to the uploaded document.
+            user_doc_id:
+              type: string
+            type:
+              type: string
+            status:
+              type: string
+              description: Processing status, e.g. new or processing.
+            review_url:
+              type: string
+              format: uri
+              description: Present when review_token was requested.
+    DocumentSummaryItem:
+      type: object
+      properties:
+        doc_id:
+          type: string
+        user_doc_id:
+          type: string
+        title:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+        created_date:
+          type: string
+          format: date-time
+    DocumentList:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+          properties:
+            documents:
+              type: array
+              items:
+                $ref: '#/components/schemas/DocumentSummaryItem'
+            total:
+              type: integer
+            limit:
+              type: integer
+            offset:
+              type: integer
+    DocumentsSummary:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Counts keyed by processing status.
+    ExtractedField:
+      type: object
+      properties:
+        label:
+          type: string
+        value:
+          type: string
+        confidence:
+          type: number
+          format: float
+        position:
+          type: array
+          items:
+            type: number
+    DocumentDetail:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+          properties:
+            doc_id:
+              type: string
+            type:
+              type: string
+            status:
+              type: string
+            documentType:
+              type: string
+            fields:
+              type: array
+              items:
+                $ref: '#/components/schemas/ExtractedField'
+            tables:
+              type: array
+              items:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  rows:
+                    type: array
+                    items:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/ExtractedField'
+    DocumentType:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        enabled:
+          type: boolean
+    DocumentTypeList:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentType'
+    UserDetail:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+          properties:
+            email:
+              type: string
+            full_name:
+              type: string
+            credit_limit:
+              type: integer
+            credit_used:
+              type: integer
+    ReviewUrlResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+          properties:
+            review_url:
+              type: string
+              format: uri
+    StatusResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        error:
+          type: string
+        message:
+          type: string

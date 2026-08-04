@@ -1,0 +1,20 @@
+{
+  "provider": "docsumo",
+  "sources": [
+    "docsumo-document-types-api-openapi.yml",
+    "docsumo-documents-api-openapi.yml",
+    "docsumo-extraction-api-openapi.yml",
+    "docsumo-review-api-openapi.yml"
+  ],
+  "outputs": [
+    "docsumo-document-types-api-openapi.yml",
+    "docsumo-documents-api-openapi.yml",
+    "docsumo-extraction-api-openapi.yml",
+    "docsumo-review-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}
