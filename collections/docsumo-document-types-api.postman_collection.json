@@ -1,0 +1,315 @@
+{
+  "item": [
+    {
+      "id": "adb35cf0-46f9-4fe5-801d-f92a4c5a57d6",
+      "name": "Document Types",
+      "description": {
+        "content": "Enabled document types and account detail.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "85910f68-60b6-4783-88cf-c5407ddb009f",
+          "name": "List enabled document types",
+          "request": {
+            "name": "List enabled document types",
+            "description": {
+              "content": "Returns the document types enabled on the account, including built-in types (invoice, bank statement, pay stub, receipt) and custom-trained types, along with web/API/email upload limits.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "eevee",
+                "apikey",
+                "user",
+                "document-types",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "afe41e70-cfd1-4174-8d8d-28c756058f2a",
+              "name": "Enabled document types.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "eevee",
+                    "apikey",
+                    "user",
+                    "document-types",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "apikey",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"string\",\n  \"data\": [\n    {\n      \"type\": \"string\",\n      \"title\": \"string\",\n      \"enabled\": true\n    },\n    {\n      \"type\": \"string\",\n      \"title\": \"string\",\n      \"enabled\": false\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "f1db7565-7e78-4ce7-97f0-eeb8d41190a7",
+              "name": "Missing or invalid API key.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "eevee",
+                    "apikey",
+                    "user",
+                    "document-types",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "apikey",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"error\": \"string\",\n  \"message\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "18e99ba5-be9d-4cb8-bcb3-b866b95e479d",
+          "name": "Get account detail and credit limits",
+          "request": {
+            "name": "Get account detail and credit limits",
+            "description": {
+              "content": "Returns account details and current credit limit and usage.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "eevee",
+                "apikey",
+                "user",
+                "detail",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "6f1676d7-66ad-4549-9c4f-7380c16297a3",
+              "name": "Account detail and credits.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "eevee",
+                    "apikey",
+                    "user",
+                    "detail",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "apikey",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"string\",\n  \"data\": {\n    \"email\": \"string\",\n    \"full_name\": \"string\",\n    \"credit_limit\": 6070,\n    \"credit_used\": 34\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "83bc332c-1822-441c-b43f-d3f42089a1b3",
+              "name": "Missing or invalid API key.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "eevee",
+                    "apikey",
+                    "user",
+                    "detail",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "apikey",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"error\": \"string\",\n  \"message\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://app.docsumo.com/api/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "apikey"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "837e41a4-7f65-496f-a397-fd224e005547",
+    "name": "Docsumo Document Types API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "REST API for the Docsumo intelligent document processing (IDP) platform. Upload documents, retrieve AI-extracted structured data and line-item tables, run human-in-the-loop review, manage document types, and delete documents. Authentication uses a personal API key passed in the `apikey` request header (also documented as `X-API-KEY`), obtainable from https://app.docsumo.com/settings/webhook-api/. Asynchronous completion is delivered via account-configured webhooks.\n\nContact Support:\n Name: Docsumo Support",
+      "type": "text/plain"
+    }
+  }
+}

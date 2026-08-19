@@ -1,0 +1,265 @@
+{
+  "item": [
+    {
+      "id": "a6811f49-190c-4007-8a63-9d0fd68b9892",
+      "name": "Extraction",
+      "description": {
+        "content": "Retrieve AI-extracted data for a processed document.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "78768d10-3593-459c-a9e0-86d1291b27c9",
+          "name": "Get document detail and extracted data",
+          "request": {
+            "name": "Get document detail and extracted data",
+            "description": {
+              "content": "Returns the document metadata together with the AI-extracted fields and line-item tables for the given document. Available once the document has finished processing.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "eevee",
+                "apikey",
+                "documents",
+                ":doc_id",
+                "detail",
+                ""
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "doc_id",
+                  "description": "(Required) Unique identifier of the document."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "d2b7d953-3104-459a-9b86-82a5f6bb8cc2",
+              "name": "Document detail with extracted data.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "eevee",
+                    "apikey",
+                    "documents",
+                    ":doc_id",
+                    "detail",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "doc_id",
+                      "description": "(Required) Unique identifier of the document."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "apikey",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"string\",\n  \"data\": {\n    \"doc_id\": \"string\",\n    \"type\": \"string\",\n    \"status\": \"string\",\n    \"documentType\": \"string\",\n    \"fields\": [\n      {\n        \"label\": \"string\",\n        \"value\": \"string\",\n        \"confidence\": 5386.384974303414,\n        \"position\": [\n          5490.316329419943,\n          1410.3147274856153\n        ]\n      },\n      {\n        \"label\": \"string\",\n        \"value\": \"string\",\n        \"confidence\": 2897.8773649757018,\n        \"position\": [\n          4954.283514540743,\n          3811.4124232777513\n        ]\n      }\n    ],\n    \"tables\": [\n      {\n        \"title\": \"string\",\n        \"rows\": [\n          [\n            {\n              \"label\": \"string\",\n              \"value\": \"string\",\n              \"confidence\": 9430.481257323145,\n              \"position\": [\n                6227.058683185729,\n                5398.698496920317\n              ]\n            },\n            {\n              \"label\": \"string\",\n              \"value\": \"string\",\n              \"confidence\": 3285.4531736100457,\n              \"position\": [\n                9475.375866430653,\n                5549.969086092658\n              ]\n            }\n          ],\n          [\n            {\n              \"label\": \"string\",\n              \"value\": \"string\",\n              \"confidence\": 6952.307619189859,\n              \"position\": [\n                6139.947138754598,\n                8975.09177759047\n              ]\n            },\n            {\n              \"label\": \"string\",\n              \"value\": \"string\",\n              \"confidence\": 8642.238349184063,\n              \"position\": [\n                8951.35486172429,\n                1434.3095443113818\n              ]\n            }\n          ]\n        ]\n      },\n      {\n        \"title\": \"string\",\n        \"rows\": [\n          [\n            {\n              \"label\": \"string\",\n              \"value\": \"string\",\n              \"confidence\": 4537.088461534998,\n              \"position\": [\n                1375.632245722267,\n                1397.3731093067033\n              ]\n            },\n            {\n              \"label\": \"string\",\n              \"value\": \"string\",\n              \"confidence\": 3032.5139567008996,\n              \"position\": [\n                83.1033973857942,\n                3076.0068295080987\n              ]\n            }\n          ],\n          [\n            {\n              \"label\": \"string\",\n              \"value\": \"string\",\n              \"confidence\": 639.3554243985922,\n              \"position\": [\n                8853.600808605535,\n                9594.00054971758\n              ]\n            },\n            {\n              \"label\": \"string\",\n              \"value\": \"string\",\n              \"confidence\": 6774.594449157254,\n              \"position\": [\n                7433.594185191966,\n                1053.6367544681168\n              ]\n            }\n          ]\n        ]\n      }\n    ]\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5222b6f3-18e3-43fe-83bf-17209d18d1e7",
+              "name": "Missing or invalid API key.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "eevee",
+                    "apikey",
+                    "documents",
+                    ":doc_id",
+                    "detail",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "doc_id",
+                      "description": "(Required) Unique identifier of the document."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "apikey",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"error\": \"string\",\n  \"message\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "2469e645-d2ec-4cae-9475-2ba33458a44b",
+              "name": "Document not found.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "eevee",
+                    "apikey",
+                    "documents",
+                    ":doc_id",
+                    "detail",
+                    ""
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "doc_id",
+                      "description": "(Required) Unique identifier of the document."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "apikey",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"error\",\n  \"error\": \"string\",\n  \"message\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://app.docsumo.com/api/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "apikey"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "5bdc1120-9aae-480d-bcd9-6cf82d8cbfa0",
+    "name": "Docsumo Document Types Extraction API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "REST API for the Docsumo intelligent document processing (IDP) platform. Upload documents, retrieve AI-extracted structured data and line-item tables, run human-in-the-loop review, manage document types, and delete documents. Authentication uses a personal API key passed in the `apikey` request header (also documented as `X-API-KEY`), obtainable from https://app.docsumo.com/settings/webhook-api/. Asynchronous completion is delivered via account-configured webhooks.\n\nContact Support:\n Name: Docsumo Support",
+      "type": "text/plain"
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Docsumo Document Types Extraction API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "apikey",
+      "value": "{{apikey}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Extraction",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get document detail and extracted data",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.docsumo.com/api/v1/eevee/apikey/documents/:doc_id/detail/",
+            "params": [
+              {
+                "name": "doc_id",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the document."
+              }
+            ]
+          },
+          "docs": "Returns the document metadata together with the AI-extracted fields and line-item tables for the given document. Available once the document has finished processing."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

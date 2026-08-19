@@ -1,0 +1,149 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Docsumo Document Types Documents API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "apikey",
+      "value": "{{apikey}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Documents",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Upload a document file",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://app.docsumo.com/api/v1/eevee/apikey/upload/",
+            "body": {
+              "type": "multipart-form",
+              "data": [
+                {
+                  "name": "file",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "type",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "user_doc_id",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "doc_meta_data",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "review_token",
+                  "type": "text",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "docs": "Uploads a document file (.pdf, .png, .jpg, .jpeg, .tiff, .tif, and .xlsx for select financial types) for processing. The document is classified to the provided `type` and queued for extraction."
+        },
+        {
+          "info": {
+            "name": "Upload a document by URL or Base64",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://app.docsumo.com/api/v1/eevee/apikey/upload/custom/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Uploads a document by remote URL or inline Base64-encoded content instead of a multipart file part. Useful for server-to-server integrations that already hold the document bytes or a hosted URL."
+        },
+        {
+          "info": {
+            "name": "List documents",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.docsumo.com/api/v1/eevee/apikey/documents/",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of documents to return."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Number of documents to skip for pagination."
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Filter by processing status (e.g. new, processed, reviewed)."
+              },
+              {
+                "name": "doc_type",
+                "value": "",
+                "type": "query",
+                "description": "Filter by document type."
+              }
+            ]
+          },
+          "docs": "Returns a paginated list of documents on the account with their processing status, optionally filtered by document type and status."
+        },
+        {
+          "info": {
+            "name": "Documents summary",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.docsumo.com/api/v1/eevee/apikey/documents/summary/"
+          },
+          "docs": "Returns aggregate counts of documents by processing status."
+        },
+        {
+          "info": {
+            "name": "Delete a document",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://app.docsumo.com/api/v1/eevee/apikey/documents/:doc_id/",
+            "params": [
+              {
+                "name": "doc_id",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the document."
+              }
+            ]
+          },
+          "docs": "Permanently deletes the document and its extracted data."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

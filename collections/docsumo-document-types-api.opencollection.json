@@ -1,0 +1,48 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Docsumo Document Types API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "apikey",
+      "value": "{{apikey}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Document Types",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List enabled document types",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.docsumo.com/api/v1/eevee/apikey/user/document-types/"
+          },
+          "docs": "Returns the document types enabled on the account, including built-in types (invoice, bank statement, pay stub, receipt) and custom-trained types, along with web/API/email upload limits."
+        },
+        {
+          "info": {
+            "name": "Get account detail and credit limits",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.docsumo.com/api/v1/eevee/apikey/user/detail/"
+          },
+          "docs": "Returns account details and current credit limit and usage."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}
