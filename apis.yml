@@ -27,6 +27,12 @@ tags:
 - IDP
 - OCR
 - Data Extraction
+- Artificial Intelligence
+tags_raw:
+- Document Processing
+- IDP
+- OCR
+- Data Extraction
 - AI
 created: '2026-06-21'
 modified: '2026-06-21'
@@ -35,6 +41,10 @@ apis:
 - aid: docsumo:docsumo-webhooks-api
   name: Docsumo Webhooks API
   tags:
+  - Webhook
+  - Event
+  - Callbacks
+  tags_raw:
   - Webhooks
   - Events
   - Callbacks
