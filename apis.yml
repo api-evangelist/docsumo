@@ -8,6 +8,18 @@ description: Docsumo is an intelligent document processing (IDP) platform that u
   validated data. The REST API at https://app.docsumo.com/api/v1 uploads documents,
   retrieves AI-extracted data, supports human-in-the-loop review, and emits
   webhooks as documents finish processing.
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: true
+  label: Hosted service · you call their endpoint
+  confidence: high
+  source:
+  - openapi
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 accessModel:
   pricing: freemium
   onboarding: self-serve
