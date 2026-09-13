@@ -1,0 +1,53 @@
+generated: '2026-09-11'
+method: probed
+source: https://mcp.docsumo.com/mcp
+status: published
+server:
+  name: docsumo
+  transport: http
+  url: https://mcp.docsumo.com/mcp
+deployment:
+  mode: remote
+  endpoint: https://mcp.docsumo.com/mcp
+  verified: probed
+  probe: live
+  checked: '2026-09-11'
+  source: docs-check 2026-09-11 (endpoint found in the provider's own documentation, then probed)
+tools_count: 17
+tools:
+- name: get_account_info
+  description: ''
+- name: list_document_types
+  description: ''
+- name: get_bank_statement_analytics
+  description: ''
+- name: list_agents
+  description: ''
+- name: get_case_type_details
+  description: ''
+- name: list_cases
+  description: ''
+- name: get_case_overview
+  description: ''
+- name: create_case
+  description: ''
+- name: update_case
+  description: ''
+- name: run_case_workflow
+  description: ''
+- name: upload_document
+  description: ''
+- name: list_documents
+  description: ''
+- name: get_document_details
+  description: ''
+- name: get_extracted_data
+  description: ''
+- name: get_documents_summary
+  description: ''
+- name: change_review_status
+  description: ''
+- name: get_review_url
+  description: ''
+tools_source: live tools/list via initialize handshake, 2026-09-11 (signals/audit_mcp_authorship.py --probe)
+authorship: provider
