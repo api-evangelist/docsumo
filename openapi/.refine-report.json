@@ -1,10 +1,7 @@
 {
   "provider": "docsumo",
   "sources": [
-    "docsumo-document-types-api-openapi.yml",
-    "docsumo-documents-api-openapi.yml",
-    "docsumo-extraction-api-openapi.yml",
-    "docsumo-review-api-openapi.yml"
+    "_original/docsumo-openapi.yml"
   ],
   "outputs": [
     "docsumo-document-types-api-openapi.yml",
@@ -15,6 +12,15 @@
   "archived": [],
   "errors": [],
   "warnings": [],
-  "notes": [],
-  "skipped": []
+  "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "docsumo-openapi.yml: upgraded openapi 3.0.1 -> OpenAPI 3.2.0",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "docsumo-document-types-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "docsumo-documents-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "docsumo-extraction-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "docsumo-review-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }

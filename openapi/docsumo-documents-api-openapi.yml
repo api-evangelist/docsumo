@@ -1,6 +1,6 @@
-openapi: 3.0.1
+openapi: 3.2.0
 info:
-  title: Docsumo Document Types Documents API
+  title: Docsumo Documents API
   description: REST API for the Docsumo intelligent document processing (IDP) platform. Upload documents, retrieve AI-extracted structured data and line-item tables, run human-in-the-loop review, manage document types, and delete documents. Authentication uses a personal API key passed in the `apikey` request header (also documented as `X-API-KEY`), obtainable from https://app.docsumo.com/settings/webhook-api/. Asynchronous completion is delivered via account-configured webhooks.
   termsOfService: https://www.docsumo.com/terms-conditions
   contact:
@@ -182,6 +182,68 @@ paths:
           $ref: '#/components/responses/NotFound'
 components:
   schemas:
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        error:
+          type: string
+        message:
+          type: string
+    DocumentList:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+          properties:
+            documents:
+              type: array
+              items:
+                $ref: '#/components/schemas/DocumentSummaryItem'
+            total:
+              type: integer
+            limit:
+              type: integer
+            offset:
+              type: integer
+    StatusResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+    DocumentSummaryItem:
+      type: object
+      properties:
+        doc_id:
+          type: string
+        user_doc_id:
+          type: string
+        title:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+        created_date:
+          type: string
+          format: date-time
+    DocumentsSummary:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Counts keyed by processing status.
     UploadResponse:
       type: object
       properties:
@@ -207,77 +269,17 @@ components:
               type: string
               format: uri
               description: Present when review_token was requested.
-    StatusResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          example: success
-        message:
-          type: string
-    DocumentSummaryItem:
-      type: object
-      properties:
-        doc_id:
-          type: string
-        user_doc_id:
-          type: string
-        title:
-          type: string
-        type:
-          type: string
-        status:
-          type: string
-        created_date:
-          type: string
-          format: date-time
-    Error:
-      type: object
-      properties:
-        status:
-          type: string
-          example: error
-        error:
-          type: string
-        message:
-          type: string
-    DocumentsSummary:
-      type: object
-      properties:
-        status:
-          type: string
-        data:
-          type: object
-          additionalProperties:
-            type: integer
-          description: Counts keyed by processing status.
-    DocumentList:
-      type: object
-      properties:
-        status:
-          type: string
-        data:
-          type: object
-          properties:
-            documents:
-              type: array
-              items:
-                $ref: '#/components/schemas/DocumentSummaryItem'
-            total:
-              type: integer
-            limit:
-              type: integer
-            offset:
-              type: integer
+  parameters:
+    DocId:
+      name: doc_id
+      in: path
+      required: true
+      description: Unique identifier of the document.
+      schema:
+        type: string
   responses:
     Unauthorized:
       description: Missing or invalid API key.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Invalid request parameters.
       content:
         application/json:
           schema:
@@ -288,14 +290,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-  parameters:
-    DocId:
-      name: doc_id
-      in: path
-      required: true
-      description: Unique identifier of the document.
-      schema:
-        type: string
+    BadRequest:
+      description: Invalid request parameters.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   securitySchemes:
     apiKeyAuth:
       type: apiKey

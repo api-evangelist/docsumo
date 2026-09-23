@@ -1,6 +1,6 @@
-openapi: 3.0.1
+openapi: 3.2.0
 info:
-  title: Docsumo Document Types Extraction API
+  title: Docsumo Extraction API
   description: REST API for the Docsumo intelligent document processing (IDP) platform. Upload documents, retrieve AI-extracted structured data and line-item tables, run human-in-the-loop review, manage document types, and delete documents. Authentication uses a personal API key passed in the `apikey` request header (also documented as `X-API-KEY`), obtainable from https://app.docsumo.com/settings/webhook-api/. Asynchronous completion is delivered via account-configured webhooks.
   termsOfService: https://www.docsumo.com/terms-conditions
   contact:
@@ -38,6 +38,16 @@ paths:
           $ref: '#/components/responses/NotFound'
 components:
   schemas:
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        error:
+          type: string
+        message:
+          type: string
     DocumentDetail:
       type: object
       properties:
@@ -85,16 +95,14 @@ components:
           type: array
           items:
             type: number
-    Error:
-      type: object
-      properties:
-        status:
-          type: string
-          example: error
-        error:
-          type: string
-        message:
-          type: string
+  parameters:
+    DocId:
+      name: doc_id
+      in: path
+      required: true
+      description: Unique identifier of the document.
+      schema:
+        type: string
   responses:
     Unauthorized:
       description: Missing or invalid API key.
@@ -108,14 +116,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-  parameters:
-    DocId:
-      name: doc_id
-      in: path
-      required: true
-      description: Unique identifier of the document.
-      schema:
-        type: string
   securitySchemes:
     apiKeyAuth:
       type: apiKey
