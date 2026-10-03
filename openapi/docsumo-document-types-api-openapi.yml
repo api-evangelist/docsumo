@@ -49,30 +49,16 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 components:
-  responses:
-    Unauthorized:
-      description: Missing or invalid API key.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
   schemas:
-    UserDetail:
+    DocumentTypeList:
       type: object
       properties:
         status:
           type: string
         data:
-          type: object
-          properties:
-            email:
-              type: string
-            full_name:
-              type: string
-            credit_limit:
-              type: integer
-            credit_used:
-              type: integer
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentType'
     DocumentType:
       type: object
       properties:
@@ -92,15 +78,29 @@ components:
           type: string
         message:
           type: string
-    DocumentTypeList:
+    UserDetail:
       type: object
       properties:
         status:
           type: string
         data:
-          type: array
-          items:
-            $ref: '#/components/schemas/DocumentType'
+          type: object
+          properties:
+            email:
+              type: string
+            full_name:
+              type: string
+            credit_limit:
+              type: integer
+            credit_used:
+              type: integer
+  responses:
+    Unauthorized:
+      description: Missing or invalid API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   securitySchemes:
     apiKeyAuth:
       type: apiKey
