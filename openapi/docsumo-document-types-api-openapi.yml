@@ -59,15 +59,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DocumentType'
-    DocumentType:
-      type: object
-      properties:
-        type:
-          type: string
-        title:
-          type: string
-        enabled:
-          type: boolean
     Error:
       type: object
       properties:
@@ -94,6 +85,15 @@ components:
               type: integer
             credit_used:
               type: integer
+    DocumentType:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        enabled:
+          type: boolean
   responses:
     Unauthorized:
       description: Missing or invalid API key.

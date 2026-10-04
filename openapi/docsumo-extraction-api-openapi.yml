@@ -38,6 +38,16 @@ paths:
           $ref: '#/components/responses/NotFound'
 components:
   schemas:
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        error:
+          type: string
+        message:
+          type: string
     DocumentDetail:
       type: object
       properties:
@@ -71,16 +81,6 @@ components:
                       type: array
                       items:
                         $ref: '#/components/schemas/ExtractedField'
-    Error:
-      type: object
-      properties:
-        status:
-          type: string
-          example: error
-        error:
-          type: string
-        message:
-          type: string
     ExtractedField:
       type: object
       properties:
@@ -96,14 +96,14 @@ components:
           items:
             type: number
   responses:
-    NotFound:
-      description: Document not found.
+    Unauthorized:
+      description: Missing or invalid API key.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Missing or invalid API key.
+    NotFound:
+      description: Document not found.
       content:
         application/json:
           schema:

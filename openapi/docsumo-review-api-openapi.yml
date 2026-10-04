@@ -70,27 +70,6 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
-  responses:
-    NotFound:
-      description: Document not found.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Missing or invalid API key.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-  parameters:
-    DocId:
-      name: doc_id
-      in: path
-      required: true
-      description: Unique identifier of the document.
-      schema:
-        type: string
   schemas:
     Error:
       type: object
@@ -100,6 +79,14 @@ components:
           example: error
         error:
           type: string
+        message:
+          type: string
+    StatusResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
         message:
           type: string
     ReviewUrlResponse:
@@ -113,14 +100,27 @@ components:
             review_url:
               type: string
               format: uri
-    StatusResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          example: success
-        message:
-          type: string
+  responses:
+    Unauthorized:
+      description: Missing or invalid API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Document not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    DocId:
+      name: doc_id
+      in: path
+      required: true
+      description: Unique identifier of the document.
+      schema:
+        type: string
   securitySchemes:
     apiKeyAuth:
       type: apiKey

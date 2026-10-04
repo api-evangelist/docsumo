@@ -182,31 +182,6 @@ paths:
           $ref: '#/components/responses/NotFound'
 components:
   schemas:
-    UploadResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          example: success
-        message:
-          type: string
-        data:
-          type: object
-          properties:
-            doc_id:
-              type: string
-              description: Identifier assigned to the uploaded document.
-            user_doc_id:
-              type: string
-            type:
-              type: string
-            status:
-              type: string
-              description: Processing status, e.g. new or processing.
-            review_url:
-              type: string
-              format: uri
-              description: Present when review_token was requested.
     Error:
       type: object
       properties:
@@ -217,24 +192,14 @@ components:
           type: string
         message:
           type: string
-    DocumentList:
+    StatusResponse:
       type: object
       properties:
         status:
           type: string
-        data:
-          type: object
-          properties:
-            documents:
-              type: array
-              items:
-                $ref: '#/components/schemas/DocumentSummaryItem'
-            total:
-              type: integer
-            limit:
-              type: integer
-            offset:
-              type: integer
+          example: success
+        message:
+          type: string
     DocumentsSummary:
       type: object
       properties:
@@ -261,7 +226,25 @@ components:
         created_date:
           type: string
           format: date-time
-    StatusResponse:
+    DocumentList:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+          properties:
+            documents:
+              type: array
+              items:
+                $ref: '#/components/schemas/DocumentSummaryItem'
+            total:
+              type: integer
+            limit:
+              type: integer
+            offset:
+              type: integer
+    UploadResponse:
       type: object
       properties:
         status:
@@ -269,13 +252,24 @@ components:
           example: success
         message:
           type: string
+        data:
+          type: object
+          properties:
+            doc_id:
+              type: string
+              description: Identifier assigned to the uploaded document.
+            user_doc_id:
+              type: string
+            type:
+              type: string
+            status:
+              type: string
+              description: Processing status, e.g. new or processing.
+            review_url:
+              type: string
+              format: uri
+              description: Present when review_token was requested.
   responses:
-    NotFound:
-      description: Document not found.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
     Unauthorized:
       description: Missing or invalid API key.
       content:
@@ -284,6 +278,12 @@ components:
             $ref: '#/components/schemas/Error'
     BadRequest:
       description: Invalid request parameters.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Document not found.
       content:
         application/json:
           schema:
