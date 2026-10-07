@@ -143,6 +143,8 @@ apis:
   - type: Postman
     url: collections/docsumo.postman_collection.json
 common:
+- type: Pricing
+  url: https://www.docsumo.com/pricing
 - url: https://www.docsumo.com/blog
   type: Blog
 - type: AgenticAccess
