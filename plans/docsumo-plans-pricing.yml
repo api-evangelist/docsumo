@@ -1,106 +1,38 @@
-# Provenance stamped 2026-10-07 (roadmap#943): written by an API Evangelist sweep (dated 2026-06-21 by the file itself), not
-# harvested from the provider. `method: generated` so the economics campaign may replace it with a
-# dated, verbatim transcription; every figure below is unverified until it does.
-method: generated
-generated: '2026-06-21'
-specification: API Commons Plans
-specificationVersion: '0.1'
-schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/Plans
-provider: Docsumo
-providerId: docsumo
-created: '2026-06-21'
-modified: '2026-06-21'
-reconciled: false
-tags:
-- Document Processing
-- IDP
-- OCR
-- Data Extraction
-- AI
-- Plans
-description: >-
-  Docsumo pricing is sales-led. The platform is sold via packaged tiers
-  (commonly a Growth/Business tier and an Enterprise tier) plus custom plans,
-  metered primarily on document/page volume processed and the document types
-  and custom models enabled. Published per-page or per-document rates are not
-  reconciled here because list pricing is gated behind contact-sales and varies
-  by volume, document type, and review/automation requirements.
-notes: >-
-  Engage Docsumo sales for a quote; confirm the document/page volume model,
-  overage rates, included document types, and seat counts during reconciliation.
+# Pricing transcribed from the provider's own page — see provenance. Numbers are quoted, not derived.
+generated: '2026-10-07'
+method: searched
+source: https://www.docsumo.com/pricing
 sources:
 - https://www.docsumo.com/pricing
-- https://support.docsumo.com/docs/document-type-web-api-and-email-limit
+provenance:
+  tool: all/0-working/economics/harvest_pricing.py
+  run: 20261007T112025
+  grounding: every price_text was found verbatim in the fetched page text
+audience: business-product
+pricing_basis: negotiated
+delivery:
+  delivery: managed
+  method: page
+  read: '2026-10-07'
+  managed_tier: Business
+published: false
+note: No numeric prices for paid plans; Business and Enterprise are quoted on page volume, features and
+  billing term. Free 14-day trial includes up to 1,000 pages. Setup fees charged in addition.
+plan_count: 3
 plans:
-- id: docsumo-trial
-  name: Free Trial
-  type: trial
-  description: >-
-    Time- and volume-limited evaluation access to upload documents and inspect
-    extracted data before committing to a paid plan.
-  entries:
-  - label: Trial Documents
-    name: trial_documents
-    type: usage
-    metric: documents
-    limit: -1
-    timeFrame: month
-    geo: global
-    unit: 1
-    price: included during trial
-    userMultiplied: false
-  elements:
-  - name: Document Upload
-  - name: Data Extraction
-  - name: Review
-- id: docsumo-growth
-  name: Growth / Business
-  type: subscription
-  description: >-
-    Packaged subscription tier with a committed monthly document/page volume,
-    a set of enabled document types, hosted review, and API and webhook access.
-    Pricing is quoted by Docsumo sales.
-  entries:
-  - label: Document Volume
-    name: document_volume
-    type: usage
-    metric: documents
-    limit: -1
-    timeFrame: month
-    geo: global
-    unit: 1
-    price: contact sales
-    userMultiplied: false
-  elements:
-  - name: Document Upload
-  - name: Data Extraction
-  - name: Review
-  - name: Document Types
-  - name: Webhooks
-  - name: API Access
-- id: docsumo-enterprise
-  name: Enterprise
-  type: enterprise
-  description: >-
-    Custom volume commitments, custom-trained document types, SSO, advanced
-    review workflows, security/compliance, and dedicated support under a
-    negotiated agreement. Contact Docsumo sales.
-  entries:
-  - label: Enterprise Agreement
-    name: enterprise
-    type: flat
-    metric: contract
-    limit: -1
-    timeFrame: year
-    geo: global
-    unit: 1
-    price: contact sales
-    userMultiplied: false
-  elements:
-  - name: Custom Volume Pricing
-  - name: Custom Document Types
-  - name: SSO
-  - name: Dedicated Support
-maintainers:
-- FN: Kin Lane
-  email: kin@apievangelist.com
+- name: Free
+  price_text: Free trial for 14 days
+  period: none
+  included_quota: Up to 1,000 free pages, 10 user licences, unlimited pre-trained document AI models,
+    field and table extraction, AI document reviewer, pre-built integrations, webhooks, APIs and Excel
+    downloads
+- name: Business
+  price_text: Custom quote
+  period: none
+  included_quota: Everything in Free, plus unlimited user licences, auto-classification and splitting,
+    custom document pipelines, test environment, audit logging
+- name: Enterprise
+  price_text: Custom quote
+  period: none
+  included_quota: Everything in Business, plus AI-powered automated workflows, case management, cross-document
+    validations, priority support
