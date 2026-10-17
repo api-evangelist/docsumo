@@ -38,16 +38,6 @@ paths:
           $ref: '#/components/responses/NotFound'
 components:
   schemas:
-    Error:
-      type: object
-      properties:
-        status:
-          type: string
-          example: error
-        error:
-          type: string
-        message:
-          type: string
     DocumentDetail:
       type: object
       properties:
@@ -95,6 +85,16 @@ components:
           type: array
           items:
             type: number
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        error:
+          type: string
+        message:
+          type: string
   responses:
     Unauthorized:
       description: Missing or invalid API key.

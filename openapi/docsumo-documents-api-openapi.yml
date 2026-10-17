@@ -182,34 +182,6 @@ paths:
           $ref: '#/components/responses/NotFound'
 components:
   schemas:
-    Error:
-      type: object
-      properties:
-        status:
-          type: string
-          example: error
-        error:
-          type: string
-        message:
-          type: string
-    StatusResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          example: success
-        message:
-          type: string
-    DocumentsSummary:
-      type: object
-      properties:
-        status:
-          type: string
-        data:
-          type: object
-          additionalProperties:
-            type: integer
-          description: Counts keyed by processing status.
     DocumentSummaryItem:
       type: object
       properties:
@@ -226,24 +198,26 @@ components:
         created_date:
           type: string
           format: date-time
-    DocumentList:
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        error:
+          type: string
+        message:
+          type: string
+    DocumentsSummary:
       type: object
       properties:
         status:
           type: string
         data:
           type: object
-          properties:
-            documents:
-              type: array
-              items:
-                $ref: '#/components/schemas/DocumentSummaryItem'
-            total:
-              type: integer
-            limit:
-              type: integer
-            offset:
-              type: integer
+          additionalProperties:
+            type: integer
+          description: Counts keyed by processing status.
     UploadResponse:
       type: object
       properties:
@@ -269,6 +243,32 @@ components:
               type: string
               format: uri
               description: Present when review_token was requested.
+    DocumentList:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+          properties:
+            documents:
+              type: array
+              items:
+                $ref: '#/components/schemas/DocumentSummaryItem'
+            total:
+              type: integer
+            limit:
+              type: integer
+            offset:
+              type: integer
+    StatusResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
   responses:
     Unauthorized:
       description: Missing or invalid API key.

@@ -81,14 +81,6 @@ components:
           type: string
         message:
           type: string
-    StatusResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          example: success
-        message:
-          type: string
     ReviewUrlResponse:
       type: object
       properties:
@@ -100,6 +92,14 @@ components:
             review_url:
               type: string
               format: uri
+    StatusResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
   responses:
     Unauthorized:
       description: Missing or invalid API key.
