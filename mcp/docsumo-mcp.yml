@@ -51,3 +51,34 @@ tools:
   description: ''
 tools_source: live tools/list via initialize handshake, 2026-09-11 (signals/audit_mcp_authorship.py --probe)
 authorship: provider
+tool_quality:
+  tool_count: 238
+  tokens_total: 103091
+  tokens_per_tool_median: 354
+  heavy_tools:
+  - name: docsumo_update_casetype_via_agent
+    tokens: 2288
+  - name: docsumo_get_table_rows
+    tokens: 1656
+  - name: docsumo_update_case_configuration
+    tokens: 1422
+  heavy_tool_count: 3
+  params_total: 232
+  params_undescribed: 232
+  params_described_pct: 0.0
+  tools_with_undescribed_params: 232
+  tools_annotated: 238
+  annotated_pct: 100.0
+  state_changing_unhinted: []
+  tools_missing_schema: 0
+  short_descriptions: 0
+  duplicate_descriptions: 0
+  duplicate_names: 0
+  nonportable_names: []
+  output_schema_count: 0
+  token_estimate: chars/3.6 of each compact tool definition
+  source: mcp/docsumo-mcp-tools.json
+  measured: '2026-10-20'
+  scored: false
+  note: Facts from the saved tools/list capture (mcp_tool_quality.py); recorded, not scored. Checks learned
+    from Glimind's agent-readiness audit.
