@@ -13,42 +13,1501 @@ deployment:
   probe: live
   checked: '2026-09-11'
   source: docs-check 2026-09-11 (endpoint found in the provider's own documentation, then probed)
-tools_count: 17
+tools_count: 238
 tools:
-- name: get_account_info
-  description: ''
-- name: list_document_types
-  description: ''
-- name: get_bank_statement_analytics
-  description: ''
-- name: list_agents
-  description: ''
-- name: get_case_type_details
-  description: ''
-- name: list_cases
-  description: ''
-- name: get_case_overview
-  description: ''
-- name: create_case
-  description: ''
-- name: update_case
-  description: ''
-- name: run_case_workflow
-  description: ''
-- name: upload_document
-  description: ''
-- name: list_documents
-  description: ''
-- name: get_document_details
-  description: ''
-- name: get_extracted_data
-  description: ''
-- name: get_documents_summary
-  description: ''
-- name: change_review_status
-  description: ''
-- name: get_review_url
-  description: ''
+- name: docsumo_autosplit_info
+  description: "Status of each child document split from an auto-split original document.\n\nWhen a multi-document\
+    \ file is uploaded to a workflow with a split step, the\noriginal is split into several child docs.\
+    \ This reports each child's status\n(and, when asked, download links for the files), so an agent can\
+    \ track a\nmulti-doc upload.\n\nArgs:\n    params: doc_id (the ORIGINAL doc id), optional\n      \
+    \  include_file (\"original\"/\"split\"/\"all\").\n\nReturns:\n    JSON with ``data.split_docs_info``\
+    \ (one entry per child with its\n         ``doc_id`` and ``status``), ``num_splits`` and ``folder_id``;\
+    \ with\n         include_file, ``orig_file_url`` and each child's ``file_url``. A\n         document\
+    \ that exists but was not split answers ``split: false``\n         with a ``note``; one still processing,\
+    \ ``split: null``. A\n         document id that does not exist is an error."
+- name: docsumo_autosplit_files
+  description: "Download links for an auto-split original and its split children.\n\nLike docsumo_autosplit_info\
+    \ but returns only the file links, no status.\n\nArgs:\n    params: doc_id (the ORIGINAL doc id),\
+    \ include_file\n        (\"original\"/\"split\"/\"all\", default original).\n\nReturns:\n    JSON\
+    \ with ``data.orig_doc_id``, and per what was asked\n         ``original_file.file_url`` and ``split_files``\
+    \ (each child's\n         ``doc_id`` and ``file_url``). A document that was not split, or is\n   \
+    \      still processing, answers ``split`` and a ``note`` as\n         docsumo_autosplit_info does."
+- name: docsumo_autosplit_download
+  description: "Download the extracted data of all documents split from an original.\n\nArgs:\n    params:\
+    \ doc_id (the ORIGINAL doc id), merge\n        (combine all children into one object), flatten (flatten\
+    \ nested fields).\n\nReturns:\n    JSON with the split documents' extracted data."
+- name: docsumo_get_document_data
+  description: "Retrieve extracted key-value and table data for a processed document.\n\nField values,\
+    \ confidence scores and line items — what a document was read to\nsay. The document must have finished\
+    \ processing. For its raw text rather than\nthe extracted fields, use docsumo_download_document with\
+    \ format=\"ocr_text\".\n\nArgs:\n    params: doc_id.\n\nReturns:\n    JSON under ``data``, grouped\
+    \ by section name and then field name.\n         Each field carries ``value``, ``orig_value`` (what\
+    \ was extracted\n         before any review correction), ``confidence`` 0-1,\n         ``review_required``,\
+    \ and ``position`` as pixel bounds on the page.\n         A table field's ``value`` is a list of rows\
+    \ of the same shape.\n         ``meta_data`` describes the document — ``title``, ``status``,\n   \
+    \      ``type``, ``folder_name``, ``review_required``, ``review_url``.\n         The file itself is\
+    \ not included."
+- name: docsumo_get_document_types
+  description: "List all available document types with their metadata and document counts.\n\nReturns\
+    \ the document types active (configured) on the account — the ones you can\nupload to — including\
+    \ their identifiers, titles, document counts, and processing\nmodel information. Each type has both\
+    \ a numeric ``id`` (for display/reference) and a\nstring ``doc_type`` identifier (e.g. ``invoice``,\
+    \ ``us_cheque``, or a custom type\nlike ``others__CErqH``); use the ``doc_type`` string for subsequent\
+    \ API calls, not\nthe numeric id. Start here to find the ``doc_type`` other tools ask for. Two\nneighbours\
+    \ answer a similar-sounding question and do not substitute:\n``docsumo_get_account_config`` lists\
+    \ pretrained types the account *may* enable\n(``can_upload: false``, no documents), and ``docsumo_model_hub_list_account_models``\n\
+    is the Model Hub's view of these same active types, carrying plan and catalog\nmetadata instead of\
+    \ document counts.\n\nAn account can hold several hundred types, so pass ``q`` to search by name\n\
+    rather than paging for one.\n\nArgs:\n    params: mode, optional q search, limit and offset.\n\nReturns:\n\
+    \    JSON with ``data.document``, one entry per active type carrying\n         ``doc_type`` (the string\
+    \ other tools take), numeric ``id``,\n         ``title``, ``category``, ``can_upload``, ``created_at``,\
+    \ and\n         ``doc_counts`` — ``all``, ``processed``, ``reviewing``,\n         ``unclassified``\
+    \ and ``classified``. ``data.total`` counts every\n         type matching ``q``, not just this page,\
+    \ and\n         ``data.disabled_doc_types`` lists the ones turned off."
+- name: docsumo_list_documents
+  description: "List documents across every document type, or within one.\n\nFilters by document type,\
+    \ date range, status, folder and uploader. This is the\naccount-wide view; for a single type's Documents\
+    \ tab — with its tabs, folder\nview and search — use docsumo_doctype_list_documents.\n\nArgs:\n  \
+    \  params: Validated input parameters containing:\n        - doc_type (str | None): Document type\
+    \ identifier to filter by\n        - limit (int): Maximum documents to return, 1-100 (default: 20)\n\
+    \        - offset (int): Pagination offset (default: 0)\n        - created_date_gte (str | None):\
+    \ Start date filter YYYY-MM-DD\n        - created_date_lte (str | None): End date filter YYYY-MM-DD\n\
+    \        - status (str | None): Document status filter\n        - sort_by (str): Sort order (default:\
+    \ \"created_date.desc\")\n        - folder_id (str | None): Only the documents inside this folder\n\
+    \        - user_id (str | None): Filter by uploader\n\nReturns:\n    JSON with documents array, total\
+    \ count, and pagination metadata\n         including has_more and next_offset fields."
+- name: docsumo_list_folders
+  description: "List the folders of a document type, a page at a time.\n\nFolders do not nest: every folder\
+    \ of a type is listed here.\n\nArgs:\n    params: doc_type, and limit and offset for the page.\n\n\
+    Returns:\n    JSON ``{\"data\": {\"documents\": [...], \"limit\": N, \"offset\": N,\n         \"total\"\
+    : N}}`` — folders arrive under ``documents``, each with\n         ``folder_id``, ``folder_name``,\
+    \ ``created_at_iso``, ``display_type``\n         (\"folder\"), ``uploaded_by.full_name``, the ``case_id``\
+    \ it belongs\n         to when it has one, and a\n         per-status document count (``doc_processed``,\
+    \ ``doc_reviewing``,\n         ``doc_review_required``, ``doc_review_skipped``, ``doc_error``).\n\
+    \         ``total`` counts every folder, not just this page."
+- name: docsumo_download_document
+  description: "Download one or more documents — the file itself, or the data extracted from it.\n\nPass\
+    \ every one you need at once; they download together.\n\nFormats — the FILE: ``original_file`` (as\
+    \ uploaded), ``searchable_pdf``,\n``images`` (one per page), ``ocr_text`` (its recognised text); the\
+    \ EXTRACTED\nDATA: ``json``, ``csv``, ``xml``. Use a file format to look at what a page\nactually\
+    \ says — to check an extracted value against the original, or to see\nsomething you have only read\
+    \ about. Use a data format for the fields and\ntables pulled out of it.\n\nArgs:\n    params: doc_ids\
+    \ and format.\n\nReturns:\n    JSON with ``format``, ``is_content`` (whether the format carries\n\
+    \         the document itself rather than its extracted data),\n         ``requested``, ``succeeded``,\
+    \ and ``documents`` — one entry per\n         document with its ``doc_id`` and either ``data`` (the\
+    \ downloaded\n         file, or one entry per page for ``images``) or ``error``. One\n         document\
+    \ failing does not stop the others."
+- name: docsumo_download_case_documents
+  description: "Download every document in a case in one call.\n\nUse this when you want the whole case\
+    \ and do not already know its document\nids; docsumo_download_document is for a set of ids you already\
+    \ have.\nDefaults to ``original_file``; choose another content format\n(searchable_pdf, images, ocr_text)\
+    \ for the document itself, or a data\nformat (json, csv, xml) for the extracted fields. Pass ``doc_ids``\
+    \ to limit\nto a subset.\n\nArgs:\n    params: case_id, format, optional doc_ids.\n\nReturns:\n  \
+    \  JSON with ``case_id``, ``format``, ``is_content``, ``requested``,\n         ``succeeded``, and\
+    \ ``documents`` — one entry per document with its\n         ``doc_id``, ``title`` and either ``data``\
+    \ (the downloaded file) or\n         ``error``. One document failing does not stop the others."
+- name: docsumo_upload_document
+  description: "Upload a document to Docsumo for processing.\n\nUploads a single file from the local filesystem\
+    \ to Docsumo. The file is\nvalidated for extension and size before upload.\n\nArgs:\n    params: Validated\
+    \ input parameters containing:\n        - file_path (str): Absolute path to the file (required). Supported:\
+    \ .jpg, .jpeg, .png, .tiff, .tif, .pdf, .xlsx, .xls. Max 500 MB.\n        - doc_type (str): Docsumo\
+    \ document type ID (required)\n        - user_doc_id (str): Optional custom tracking identifier\n\
+    \        - doc_meta_data (str): Optional JSON string of metadata\n        - folder_name (str): Optional\
+    \ folder name to upload into\n        - folder_id (str): Optional folder ID (takes precedence over\
+    \ folder_name)\n        - password (str): Optional password for password-protected PDFs\n        -\
+    \ filename (str): Optional filename override\n        - mode (str): \"prod\" (default) or \"test\"\
+    \n\nReturns:\n    JSON with the upload result including the new document ID."
+- name: docsumo_upload_case_document
+  description: "Upload a packet of documents directly to a casetype — the way to ingest REAL cases.\n\n\
+    Creates a new case under the casetype (or adds to an existing case) and uploads\nthe files straight\
+    \ to it, triggering the published workflow. This is the correct,\ndrive-free path for a real packet:\
+    \ prefer it over the workflow-drive tools\n(docsumo_upload_drive_folder / docsumo_run_drive_folder),\
+    \ which are for testing a\nworkflow while building/correcting it and would otherwise leave throwaway\
+    \ folders\nin the workflow's test drive.\n\nArgs:\n    params: Validated input parameters containing:\n\
+    \        - casetype_id (str): The casetype ID for the case (required)\n        - file_paths (list[str]\
+    \ | None): File paths to upload (up to 30)\n        - case_id (str): Optional existing case ID\n \
+    \       - case_name (str): Optional name for a new case\n        - doctype (str): Optional doctype\
+    \ to assign\n        - trigger_workflow (bool): Trigger workflow after upload (default: true)\n  \
+    \      - mode (str): \"prod\" (default) or \"test\"\n        - case_fields (str): Optional JSON string\
+    \ of case field values\n        - user_case_id (str): Optional custom case identifier\n        - user_case_metadata\
+    \ (str): Optional JSON string of metadata\n\nReturns:\n    JSON with the case creation/upload result."
+- name: docsumo_force_run_case
+  description: "Cancel any in-flight executions for a case and run its workflow fresh.\n\nUse this to\
+    \ recover a case stuck in `processing`, or to force a clean re-run.\nUnlike docsumo_rerun_case (a\
+    \ cheap replay that reuses extraction), this cancels\nrunning executions first, so it is the reliable\
+    \ \"make it run now\" action.\n\nAUTH CAVEAT (verified): the case run routes require a web\nsession\
+    \ and return HTTP 401 under API-key auth. So this tool works from a\nweb-session context but NOT via\
+    \ an API-key-only MCP connection — for API-key\nautomation, (re)run by uploading with docsumo_upload_case_document\n\
+    (trigger_workflow=true) instead.\n\nArgs:\n    params: case_id, mode (\"prod\"/\"test\"), optional\n\
+    \        workflow_block_id to start from.\n\nReturns:\n    JSON with the new execution data."
+- name: docsumo_run_workflow_upload
+  description: "Upload a single file to a workflow and run it — in one call.\n\nThe production API-ingestion\
+    \ entry point: creates a case for the workflow's\ncasetype, uploads the file, and triggers the run.\
+    \ More direct than\ndocsumo_upload_case_document when you have a workflow_id (rather than a\ncasetype_id).\
+    \ Accepts API-key auth (verified). The workflow must be published\nand resolvable for ingestion —\
+    \ an unconfigured workflow returns 404\n\"Workflow draft not found\"; in that case use docsumo_upload_case_document.\n\
+    \nArgs:\n    params: file_path (absolute), workflow_id.\n\nReturns:\n    JSON with ``workflow_id``\
+    \ and the ``workflow_version`` that ran.\n         The case it created is not in the answer: it is\
+    \ the newest case\n         of the workflow's case type in docsumo_list_cases."
+- name: docsumo_get_user_detail
+  description: "Retrieve the current user's identity, document allowance and usage.\n\nAnswers \"how much\
+    \ of my quota is left\" and \"which document types can I use\".\nFor the account's plan, role and\
+    \ organisation settings instead of this usage\nview, use docsumo_get_account_user.\n\nReturns:\n \
+    \   JSON with the user's email and name, monthly document limit and\n    current usage, and ``document_types_count``\
+    \ — how many types they may\n    use. Use docsumo_get_document_types for the types themselves."
+- name: docsumo_get_doctype_schema_and_fields
+  description: "Read a document type's fields: every section, field, prompt and dropdown.\n\nThis is what\
+    \ the account extracts from a document and how. Use it to answer\nwhat fields a document type has,\
+    \ what a field is called, what type it is, or\nwhat options a dropdown field offers, and to see a\
+    \ field's current wording\nbefore changing it.\n\nPass ``summary`` to list what a type extracts without\
+    \ the prompt wording.\nWhile the user has Field Setup open for the type, this reads the fields as\n\
+    that screen shows them, unsaved changes included.\n\nArgs:\n    params: doctype_id, and summary for\
+    \ the compact form.\n\nReturns:\n    JSON under ``data`` with ``doc_type``, ``doctype_title``,\n \
+    \        ``doctype_description``, ``additional_params``, ``doctype_settings``\n         (``image_quality``\
+    \ and ``stp``), and ``sections``. Each section is\n         keyed by its name and carries ``section_id``,\
+    \ ``config`` and\n         ``fields``; each field is keyed by its name and carries\n         ``field_id``,\
+    \ ``type`` (such as string, number, date, drop_down or\n         table), ``optional_settings``, ``columns``\
+    \ for a table field, and\n         ``blocks`` — the ordered steps that produce the value, each with\
+    \ a\n         ``type``, a ``label`` and a ``config``. A ``drop_down`` block's\n         ``config.options``\
+    \ is the list of choices the field offers.\n         References inside prompts read as ``<@Section___Field>``.\n\
+    \         With ``summary`` on, each section carries ``section_id`` and its\n         fields as ``field_id``,\
+    \ ``type`` and a table's ``columns`` only.\n         ``read_from`` is ``draft`` when this read the\
+    \ Field Setup the user\n         has open, and ``live`` otherwise."
+- name: docsumo_add_doctype_fields
+  description: "Add extraction fields to a document type.\n\nCreates new sections, or appends fields to\
+    \ sections that already exist. Read\ndocsumo_get_doctype_schema_and_fields first: a field name that\
+    \ already exists in the\nsection fails the whole request and adds nothing.\n\nArgs:\n    params: doctype_id\
+    \ and sections dict.\n\nReturns:\n    JSON under ``data`` with ``inserted`` — each section with the\n\
+    \         ``field_id`` of every field added — ``warnings`` and\n         ``applied_to``. An empty\
+    \ ``inserted`` means nothing was added,\n         whatever ``message`` says; ``warnings`` says why.\
+    \ ``applied_to``\n         is ``live``, or ``draft`` when the user has Field Setup open for\n    \
+    \     the type: the change shows there and is not live until that\n         Field Setup is saved."
+- name: docsumo_update_doctype_fields
+  description: "Change extraction fields that already exist on a document type.\n\nSend only what changes\
+    \ — type, blocks, optional_settings or columns. Two\nreplacements rather than merges: giving ``blocks``\
+    \ replaces the field's whole\nblock list, and giving ``columns`` replaces a table field's whole column\
+    \ set.\nRead docsumo_get_doctype_schema_and_fields first to see what is there now.\n\nArgs:\n    params:\
+    \ doctype_id and fields dict\n        (section -> field name -> update payload).\n\nReturns:\n   \
+    \ JSON under ``data`` with ``updated`` (each field changed),\n         ``not_found`` (fields in the\
+    \ request that do not exist — skipped\n         without an error), ``warnings`` (changes skipped or\
+    \ ignored,\n         with the reason) and ``applied_to`` (``live``, or ``draft`` when\n         the\
+    \ change went to the Field Setup the user has open and is not\n         live until it is saved)."
+- name: docsumo_delete_doctype_fields
+  description: "Delete sections, fields, or table columns from a document type.\n\nPaths use triple-underscore\
+    \ separators:\n- \"Section\" — delete entire section\n- \"Section___Field\" — delete a field or table\n\
+    - \"Section___Table___Column\" — delete a table column\n\nA section takes its fields with it, and\
+    \ a table field takes its columns.\nRead docsumo_get_doctype_schema_and_fields first for the exact\
+    \ names.\n\nArgs:\n    params: doctype_id and field path list.\n\nReturns:\n    JSON with ``data.deleted``\
+    \ (the paths removed),\n         ``data.deleted_field_ids``, ``data.not_found`` (paths that matched\n\
+    \         nothing — a mistyped path is reported here, not as an error),\n         ``data.applied_to``\
+    \ (``live``, or ``draft`` when the change went\n         to the Field Setup the user has open and\
+    \ is not live until it is\n         saved) and a ``message``. In an open Field Setup, deleting every\n\
+    \         field is refused; add the replacements first."
+- name: docsumo_save_field_setup_draft
+  description: "Save the user's unsaved Field Setup for a document type, making its changes live.\n\n\
+    Field changes made while the user has Field Setup open land there unsaved\n(``applied_to`` is ``draft``),\
+    \ and stay there if they leave the screen.\nSaving applies everything unsaved in it, the user's own\
+    \ edits included. It\nre-extracts no document.\n\nFails with a conflict and changes nothing when it\
+    \ cannot save safely: the\nuser has no unsaved Field Setup for the type, or, when they are not on\
+    \ it,\nnone changed through these tools in the last hour, or Field Setup or the\nlive fields changed\
+    \ since. In that last case some changes may already be\nlive: read the live fields first and make\
+    \ only the missing changes again;\noutside Field Setup they go live directly.\n\nArgs:\n    params:\
+    \ doctype_id.\n\nReturns:\n    JSON under ``data`` with ``doc_type`` and ``message``."
+- name: docsumo_update_doctype_configuration
+  description: "Change a document type's name, description or processing settings.\n\nThis is the document\
+    \ type as a whole, not its fields — for those use\ndocsumo_update_doctype_fields. Omitted values are\
+    \ left as they are.\n\nArgs:\n    params: doctype_id and optional\n        doctype_title, doctype_description,\
+    \ additional_params,\n        doctype_settings (image_quality, stp).\n\nReturns:\n    JSON under ``data``\
+    \ with ``updated_settings`` (the settings\n         written), ``failed_settings`` (each with its error)\
+    \ and\n         ``warnings``. A setting sent but absent from ``updated_settings``\n         was not\
+    \ applied."
+- name: docsumo_get_doctype_general_analytics
+  description: "How much a document type was used, and how fast it processed.\n\nVolume and speed only\
+    \ — for how correct the extraction was, use\ndocsumo_get_doctype_accuracy_analytics, or docsumo_get_doctype_analytics\
+    \ for\nboth at once. Mirrors the general half of Active Document → Analytics.\n\nArgs:\n    params:\
+    \ doc_type, report_type (daily/weekly/range),\n        optional from_date/to_date for range, optional\
+    \ user_ids filter.\n\nReturns:\n    JSON with ``counts`` (documents by status), ``usage``,\n     \
+    \    ``average_api_time_per_doc``, ``average_turnaround_time`` and\n         ``average_time_per_doc``.\
+    \ The time series are shaped for the\n         screen's charts: read each one's ``datasets[].data``\
+    \ against its\n         ``labels``, and ignore the colour fields. A metric with nothing to\n     \
+    \    report is null rather than absent."
+- name: docsumo_get_doctype_accuracy_analytics
+  description: "How accurate a document type's extraction was, field by field.\n\nAnswers how well extraction\
+    \ is performing and which fields reviewers correct\nmost. Accuracy only — for volume and speed use\n\
+    docsumo_get_doctype_general_analytics, or docsumo_get_doctype_analytics for\nboth at once. Measured\
+    \ over the last 1000 processed documents in the window.\n\nArgs:\n    params: doc_type, report_type\
+    \ (daily/weekly/range),\n        optional from_date/to_date for range, optional user_ids filter.\n\
+    \nReturns:\n    JSON with ``average_accuracy`` over the window, ``accuracy`` broken\n         down\
+    \ per field, and ``average_correction`` — how many values a\n         reviewer changed per document.\
+    \ Series are chart-shaped: read\n         ``datasets[].data`` against ``labels``."
+- name: docsumo_get_doctype_analytics
+  description: "Everything the Analytics screen shows for a document type.\n\nVolume, speed and accuracy\
+    \ in one call — the two halves fetched together.\nUse a half on its own when only one is wanted.\n\
+    \nArgs:\n    params: doc_type, report_type (daily/weekly/range),\n        optional from_date/to_date\
+    \ for range, optional user_ids filter.\n\nReturns:\n    JSON merging both halves — counts, usage and\
+    \ timing alongside\n         accuracy and corrections, in the same chart shape."
+- name: docsumo_configure_get
+  description: "Fetch Configure settings for a document type.\n\nReturns the full filter list and setting\
+    \ values shown on the Configure screen.\nOptionally filter to one sub-tab: general, preprocessing,\
+    \ import_export,\nextraction, or post_processing.\n\nArgs:\n    params: doc_type, optional title,\
+    \ optional tab filter.\n\nReturns:\n    JSON with ``settings`` — one entry per control with ``id``,\n\
+    \         ``label``, ``help_text``, its current ``value``, and the ``tab`` it\n         sits on. ``value_label``\
+    \ carries what the value means and is\n         present only where the value is one of a fixed set\
+    \ of choices;\n         ``editable`` only where the screen restricts editing. The choices\n      \
+    \   themselves are in ``filter_list``, joined to a setting by\n         ``filter_id`` — read it to\
+    \ see what else a setting accepts."
+- name: docsumo_configure_get_setting
+  description: "Fetch a single Configure setting by name or id.\n\nArgs:\n    params: doc_type, setting_name\
+    \ or id.\n\nReturns:\n    JSON with ``data`` for the one setting: ``id``, ``filter_id``,\n       \
+    \  ``label``, ``help_text``, ``order``, the ``tab`` it sits on, and its\n         current ``value``.\
+    \ An id that is not a setting on this type's\n         Configure screen answers with ``data`` null\
+    \ and a ``message``."
+- name: docsumo_configure_update_setting
+  description: "Update any Configure setting (General, Pre-processing, Import & Export, Extraction, Post-processing).\n\
+    \nUse docsumo_configure_get first to inspect current values. Provide setting_name\n(e.g. image_quality,\
+    \ ai_extractor, custom_processing) or raw id+filter_id.\n\nArgs:\n    params: doc_type, setting_name\
+    \ or id+filter_id, value, optional bulk_update.\n\nReturns:\n    JSON with the setting as it stands\
+    \ after the write — check its\n         ``value`` is the one sent, since a rejected value is not reported\n\
+    \         as an error."
+- name: docsumo_get_document_type_setting
+  description: "Fetch a single document type setting.\n\nThe same call as docsumo_configure_get_setting,\
+    \ under the name the older\nintegrations use.\n\nReturns:\n    JSON with ``data`` for the one setting:\
+    \ ``id``, ``filter_id``,\n         ``label``, ``help_text``, ``order``, the ``tab`` it sits on, and\
+    \ its\n         current ``value``. An id that is not a setting on this type's\n         Configure\
+    \ screen answers with ``data`` null and a ``message``."
+- name: docsumo_update_document_type_setting
+  description: "Update a document type setting.\n\nThe same call as docsumo_configure_update_setting,\
+    \ under the name the older\nintegrations use.\n\nReturns:\n    JSON with the setting as it stands\
+    \ after the write — check its\n         ``value`` is the one sent, since a rejected value is not reported\n\
+    \         as an error."
+- name: docsumo_configure_get_extraction
+  description: "Fetch Extraction tab settings: AI Extractor, model selection, vision model, batching,\
+    \ reasoning.\n\nSame values docsumo_configure_get returns with tab=\"extraction\"; use that one to\
+    \ read\nseveral tabs at once.\n\nUse docsumo_configure_update_setting with setting_name values such\
+    \ as ai_extractor,\nselect_ai_model, vision_model, continuous_learning, fields_batch_size, or reasoning_effort.\n\
+    \nArgs:\n    params: doc_type, optional title.\n\nReturns:\n    JSON with ``tab``, and ``settings``\
+    \ — one entry per control with\n         ``id``, ``label``, ``help_text``, its current ``value``,\
+    \ and\n         ``editable``. Pass an ``id`` or the setting name to\n         docsumo_configure_update_setting\
+    \ to change one."
+- name: docsumo_configure_get_model_options
+  description: "Fetch the trained-model choices of an extended radio button setting (Extraction tab).\n\
+    \nArgs:\n    params: setting_id, doc_type.\n\nReturns:\n    JSON with the model choices that setting\
+    \ accepts, each with the\n         value to pass back to docsumo_configure_update_setting."
+- name: docsumo_configure_list_nlp_versions
+  description: "List NLP train model versions for a document type (Extraction tab).\n\nReturns:\n    JSON\
+    \ with a ``data`` list of trained NLP model versions. A document\n         type that has never been\
+    \ trained returns an empty list."
+- name: docsumo_configure_start_nlp_training
+  description: "Start NLP model training for a document type (Extraction tab).\n\nReturns:\n    JSON with\
+    \ training start response."
+- name: docsumo_configure_get_general
+  description: "Fetch General tab settings: name, description, team assignment, notifications, STP, disable/delete.\n\
+    \nSame values docsumo_configure_get returns with tab=\"general\"; use that one to read\nseveral tabs\
+    \ at once.\n\nArgs:\n    params: doc_type, optional title.\n\nReturns:\n    JSON with ``tab``, and\
+    \ ``settings`` — one entry per control with\n         ``id``, ``label``, ``help_text``, its current\
+    \ ``value``, and\n         ``editable``. Pass an ``id`` or the setting name to\n         docsumo_configure_update_setting\
+    \ to change one."
+- name: docsumo_configure_update_doctype_title
+  description: "Rename the document type display label (General tab → Document type name).\n\nArgs:\n\
+    \    params: doc_type, title.\n\nReturns:\n    JSON with ``data`` — the type as it now stands, its\
+    \ ``title``\n         being the one given (renamed with a number when that one was\n         taken).\
+    \ ``data`` is null for a disabled type."
+- name: docsumo_configure_disable_doctype
+  description: "Disable or re-enable a document type (General tab → Disable document type).\n\nArgs:\n\
+    \    params: doc_type, enabled (false to disable).\n\nReturns:\n    JSON with ``data`` — the type\
+    \ as it now stands, ``can_upload``\n         saying whether it is enabled."
+- name: docsumo_configure_delete_doctype
+  description: "Permanently delete a document type, with every document in it.\n\nIts documents, extracted\
+    \ data, settings, fields and custom code are all\ndeleted, and none of it can be restored.\n\nArgs:\n\
+    \    params: doc_type.\n\nReturns:\n    JSON with ``data.deleted_doc_type``."
+- name: docsumo_configure_reset_doctype
+  description: "Restore a document type's default fields, deleting every field added to it.\n\nIts sections,\
+    \ fields and field settings are replaced by the type's default\ntemplate; a custom type gets back\
+    \ the placeholder sections a new custom\ntype starts with. Its documents and Configure settings are\
+    \ not touched.\n\nArgs:\n    params: doc_type, and excel_type for a spreadsheet type.\n\nReturns:\n\
+    \    JSON with the reset response."
+- name: docsumo_configure_list_auto_classify_versions
+  description: "List AI auto-classifier model versions (General tab, auto_classify_ai doc types).\n\n\
+    Returns:\n    JSON with a ``data`` list of trained classifier versions. An\n         account that\
+    \ has never trained one returns an empty list."
+- name: docsumo_configure_get_auto_classify_status
+  description: "Whether an AI auto-classifier can be trained on the given document types.\n\nReturns:\n\
+    \    JSON with ``status`` — \"training\" while a model is training,\n         \"ready_to_train\" when\
+    \ every type has the 20 processed documents\n         training needs — and a ``message``. A type with\
+    \ fewer than 20\n         processed documents is refused with a message saying so."
+- name: docsumo_configure_start_auto_classify_training
+  description: "Start AI auto-classifier model training (General tab, custom classifier).\n\nArgs:\n \
+    \   params: labels — document type identifiers to include in training.\n\nReturns:\n    JSON with\
+    \ training start response."
+- name: docsumo_configure_get_import_export
+  description: "Fetch Import & Export tab settings: email import address, email body parsing, folder options.\n\
+    \nSame values docsumo_configure_get returns with tab=\"import_export\"; use that one to read\nseveral\
+    \ tabs at once.\n\nUse docsumo_configure_update_setting with setting_name values such as parse_email_body,\n\
+    create_folder_from_subject, upload_to_existing_folder, or notify_on_upload_failure.\n\nArgs:\n   \
+    \ params: doc_type, optional title.\n\nReturns:\n    JSON with ``tab``, and ``settings`` — one entry\
+    \ per control with\n         ``id``, ``label``, ``help_text``, its current ``value``, and\n      \
+    \   ``editable``. Pass an ``id`` or the setting name to\n         docsumo_configure_update_setting\
+    \ to change one."
+- name: docsumo_configure_download_samples
+  description: "Download sample JSON or CSV export files (Import & Export tab → Download sample).\n\n\
+    Args:\n    params: doc_type, format (\"json\" or \"csv_long\").\n\nReturns:\n    JSON with ``data.download_url``\
+    \ for the generated sample."
+- name: docsumo_configure_get_post_processing
+  description: "Fetch Post-processing tab settings: custom Python/JS processing code.\n\nSame values docsumo_configure_get\
+    \ returns with tab=\"post_processing\"; use that one to read\nseveral tabs at once.\n\nUse docsumo_configure_update_setting\
+    \ with setting_name custom_processing to save code.\nUse the validate/restore/reset tools for version\
+    \ management.\n\nArgs:\n    params: doc_type, optional title.\n\nReturns:\n    JSON with ``tab``,\
+    \ and ``settings`` — one entry per control with\n         ``id``, ``label``, ``help_text``, its current\
+    \ ``value``, and\n         ``editable``. Pass an ``id`` or the setting name to\n         docsumo_configure_update_setting\
+    \ to change one."
+- name: docsumo_configure_validate_custom_code
+  description: "Validate Python custom processing code before saving (Post-processing tab).\n\nOnly Python\
+    \ can be validated; JavaScript custom code is checked when it runs.\n\nArgs:\n    params: doc_type,\
+    \ value (code).\n\nReturns:\n    JSON with validation result."
+- name: docsumo_configure_list_custom_code_versions
+  description: "List custom code version history (Post-processing tab).\n\nReturns:\n    JSON with ``data.python_code_versions``,\
+    \ and\n         ``data.javascript_code_versions`` only for an Excel-type document\n         type (``data.excel_type``\
+    \ says which). Pass a version to\n         docsumo_configure_get_custom_code_version for its code."
+- name: docsumo_configure_get_custom_code_version
+  description: "Fetch custom code for a specific version (Post-processing tab).\n\nArgs:\n    params:\
+    \ doc_type, version_id, language.\n\nReturns:\n    JSON with that version's saved code as its ``value``."
+- name: docsumo_configure_restore_custom_code
+  description: "Restore a previous custom code version (Post-processing tab).\n\nArgs:\n    params: doc_type,\
+    \ version_id, language.\n\nReturns:\n    JSON with restored code."
+- name: docsumo_configure_reset_custom_code
+  description: "Reset custom processing code to the platform default (Post-processing tab).\n\nArgs:\n\
+    \    params: doc_type, language.\n\nReturns:\n    JSON with default code value."
+- name: docsumo_configure_get_preprocessing
+  description: "Fetch Pre-processing tab settings: image quality, orientation, OCR, split, additional\
+    \ params.\n\nSame values docsumo_configure_get returns with tab=\"preprocessing\"; use that one to\
+    \ read\nseveral tabs at once.\n\nUse docsumo_configure_update_setting with setting_name values such\
+    \ as image_quality,\nsplit_type, additional_parameters, custom_api_url, or split_prompt to update\
+    \ them.\n\nArgs:\n    params: doc_type, optional title.\n\nReturns:\n    JSON with ``tab``, and ``settings``\
+    \ — one entry per control with\n         ``id``, ``label``, ``help_text``, its current ``value``,\
+    \ and\n         ``editable``. Pass an ``id`` or the setting name to\n         docsumo_configure_update_setting\
+    \ to change one."
+- name: docsumo_doctype_delete_document
+  description: "Delete a single document from the Documents tab.\n\nReturns:\n    JSON with ``data.deleted_doc_id``,\
+    \ the document that was deleted."
+- name: docsumo_doctype_delete_documents_and_folders
+  description: "Bulk delete selected documents and/or folders (Documents tab selection bar).\n\nSupports\
+    \ select_all with filter query params, matching the UI delete action.\n\nReturns:\n    JSON with the\
+    \ delete response."
+- name: docsumo_doctype_retry_documents
+  description: "Reprocess documents, running extraction over them again.\n\nUse for documents that errored\
+    \ or that a configuration change should be\nreapplied to. Either name ``doc_ids``/``folder_ids`` or\
+    \ set ``select_all``\nto take everything the filters match — with ``select_all`` the reach is the\n\
+    whole filtered set, so check it with docsumo_doctype_get_document_counts\nfirst, and the cost with\
+    \ docsumo_doctype_calculate_document_credits.\n\nReturns:\n    JSON acknowledging the request. Reprocessing\
+    \ then runs in the\n         background, so the documents are not finished when this returns.\n  \
+    \       Their status is read with docsumo_doctype_list_documents."
+- name: docsumo_doctype_change_document_type
+  description: "Move documents to a different document type, and extract them again.\n\nThe documents\
+    \ are re-read against the target type's fields, so their\nexisting extracted data is replaced. ``doc_type``\
+    \ is the type they are in\nnow; ``doc_type_id`` is the numeric id of the one they are moving to —\
+    \ both\ncome from docsumo_get_document_types. With ``select_all`` the reach is every\ndocument the\
+    \ filters match; check the cost with\ndocsumo_doctype_calculate_document_credits first.\n\nArgs:\n\
+    \    params: doc_type_id (target type numeric ID), selection, and filters.\n\nReturns:\n    JSON acknowledging\
+    \ the request. The re-extraction runs in the\n         background rather than finishing before this\
+    \ returns."
+- name: docsumo_doctype_change_document_user
+  description: "Assign selected documents to a user (Documents tab → Assign).\n\nReturns:\n    JSON with\
+    \ the assignment response."
+- name: docsumo_doctype_move_documents
+  description: "Move documents from one folder of a document type to another.\n\nName the documents, or\
+    \ set ``select_all`` for everything the filters match\nin the source folder. Folders themselves cannot\
+    \ be moved.\n\nReturns:\n    JSON with the move response."
+- name: docsumo_doctype_download_documents
+  description: "Download the extracted data of documents you can name, as one file.\n\nPick by id. To\
+    \ pick by filter instead use docsumo_doctype_download_all_documents,\nby folder docsumo_doctype_download_folder,\
+    \ and for a single document in any\nformat — the file itself, not just its data — docsumo_download_document.\n\
+    \nReturns:\n    JSON with a ``download_url`` for the generated file."
+- name: docsumo_doctype_download_folder
+  description: "Download the extracted data of every document inside named folders.\n\nReturns:\n    JSON\
+    \ with a ``download_url`` for the generated file."
+- name: docsumo_doctype_download_all_documents
+  description: "Download the extracted data of every document the filters match.\n\nThe filter-driven\
+    \ counterpart to docsumo_doctype_download_documents, which\ntakes explicit ids. Narrow with the same\
+    \ filters the Documents tab offers;\nstatus [\"processed\"] exports the Processed tab.\n\nReturns:\n\
+    \    JSON with a ``download_url`` for the generated file."
+- name: docsumo_doctype_calculate_document_credits
+  description: "Estimate the credits a reprocess or type change would spend.\n\nRun this before docsumo_doctype_retry_documents\
+    \ or\ndocsumo_doctype_change_document_type when the selection is large, so the\nuser can be told the\
+    \ cost first. Takes the same selection and filters those\ntools do.\n\nReturns:\n    JSON with ``credits``\
+    \ and the number of documents they cover."
+- name: docsumo_doctype_create_folder
+  description: "Create a folder on the Documents tab.\n\nReturns:\n    JSON with folder_id and folder\
+    \ metadata."
+- name: docsumo_doctype_edit_folder
+  description: "Rename a folder by folder ID.\n\nReturns:\n    JSON with the update response."
+- name: docsumo_doctype_get_folder_detail
+  description: "Fetch folder metadata (name, counts, breadcrumb context).\n\nReturns:\n    JSON with the\
+    \ folder's ``folder_name``, ``folder_id``, the\n         ``case_id`` it belongs to when it has one,\
+    \ ``uploaded_by``,\n         timestamps, and a per-status document count (``doc_processed``,\n   \
+    \      ``doc_reviewing``, ``doc_review_required``, ``doc_review_skipped``,\n         ``doc_error``)."
+- name: docsumo_doctype_rename_file_or_folder
+  description: "Rename a document file or folder from the Documents tab selection bar.\n\nArgs:\n    params:\
+    \ name, and either folder_id or doc_id.\n\nReturns:\n    JSON with the rename response."
+- name: docsumo_doctype_list_documents
+  description: "List one document type's documents, as its Documents tab shows them.\n\nCarries what that\
+    \ tab offers: sub-tab (all/review/processed/skipped), status,\ndates, folder, uploader, search, pagination\
+    \ and folder-or-file view. To look\nacross every document type instead, use docsumo_list_documents.\n\
+    \nArgs:\n    params: doc_type, tab, filters, limit, offset, sort_by, view.\n\nReturns:\n    JSON with\
+    \ ``data.documents`` plus ``_pagination`` carrying\n         ``has_more`` and ``next_offset``. What\
+    \ the rows are depends on\n         ``view``: the default folder view returns folders — each with\n\
+    \         ``folder_id``, ``folder_name``, ``uploaded_by`` and a per-status\n         document count\
+    \ — while ``files_only`` returns the documents\n         themselves."
+- name: docsumo_doctype_get_document_counts
+  description: "Count a document type's documents by status.\n\nThe cheap way to answer how many there\
+    \ are, without listing them. Takes the\nsame filters as docsumo_doctype_list_documents, so a date\
+    \ range narrows the\ncount the same way.\n\nArgs:\n    params: doc_type and optional filters (dates,\
+    \ folder, user, search).\n\nReturns:\n    JSON with ``data.counts``: ``all``, ``review``, ``processed``\
+    \ and\n         ``skipped``, each honouring the filters given."
+- name: docsumo_field_setup_get
+  description: "Open Field Setup for a document type and read every field's block settings.\n\nOpens Field\
+    \ Setup as docsumo_field_setup_get_structure does, so any change\nfrom an earlier session that was\
+    \ not saved is discarded, then reads the\nblock settings of each field and table column when include_block_settings\n\
+    is true.\n\nArgs:\n    params: doc_type, optional include_block_settings flag.\n\nReturns:\n    JSON\
+    \ with ``structure`` (the sections and fields) and, with\n         include_block_settings, ``field_setup``:\
+    \ one entry per field or\n         table column with its ``path`` (Section___Field or\n         Section___Table___Column),\
+    \ ``field_id``, and ``blocks`` — each\n         block's ``id``, ``type``, ``order``, ``label`` and\
+    \ ``config`` — or\n         ``error`` when its settings could not be read."
+- name: docsumo_field_setup_get_structure
+  description: "Open Field Setup for a document type and return its sections and fields.\n\nAs when the\
+    \ Field Setup screen opens, the saved fields are loaded into a\nfresh editing session: a change from\
+    \ an earlier session that was not saved\nis discarded. To re-read a section during a session without\
+    \ losing changes,\nuse docsumo_field_setup_get_section_fields.\n\nReturns:\n    JSON with ``data.sections``,\
+    \ each with its ``id``, ``title``,\n         ``type`` and ``fields``; a table field lists its ``columns``."
+- name: docsumo_field_setup_get_data_types
+  description: "List the data types a field can be given.\n\nReturns:\n    JSON list of data types, each\
+    \ with its numeric ``id``, ``label``\n         (as the field editor shows it), ``type`` key, and the\
+    \ ``format``\n         and ``format_message`` used to validate a value against it."
+- name: docsumo_field_setup_get_settings_options
+  description: "List the per-field setting controls a document type offers.\n\nThe catalog behind a field's\
+    \ settings panel — which controls exist and what\neach one accepts. For the fields themselves and\
+    \ their current values, read\ndocsumo_get_doctype_schema_and_fields.\n\nReturns:\n    JSON with a\
+    \ ``data`` list, one entry per setting control, each\n         carrying its ``id``, its ``filter_type``\
+    \ (which kind of control it\n         is) and the ``options`` it accepts."
+- name: docsumo_field_setup_start_session
+  description: "List the recent documents a Field Setup session can be tested against.\n\nDocuments under\
+    \ review come first, and at most 20 are returned.\n\nReturns:\n    JSON with ``data.document``: each\
+    \ document's ``doc_id``, ``title``\n         and ``pages`` (page ids and sizes, without image links).\
+    \ With\n         ``source=\"data_tables\"``, no documents are listed."
+- name: docsumo_field_setup_get_lookup_fields
+  description: "List lookup reference fields available for lookup block configuration.\n\nReturns:\n \
+    \   JSON with the fields a lookup can be keyed on."
+- name: docsumo_field_setup_get_section_fields
+  description: "Read one section's fields as they stand in the current editing session.\n\nChanges made\
+    \ in the session and not yet saved are included, and nothing is\ndiscarded — the way to check an edit\
+    \ before saving it.\n\nReturns:\n    JSON with the fields in that section."
+- name: docsumo_field_setup_get_field_settings
+  description: "Fetch block settings and optional settings for one field.\n\nReturns:\n    JSON with that\
+    \ field's current settings."
+- name: docsumo_field_setup_save
+  description: "Save field setup changes and trigger extraction (Save & Apply in the UI).\n\nArgs:\n \
+    \   params: doc_type, save_type (one|all), doc_id, status.\n\nReturns:\n    JSON save response."
+- name: docsumo_field_setup_cancel
+  description: "Discard all unsaved field setup draft changes.\n\nReturns:\n    JSON acknowledging the\
+    \ draft change. Nothing reaches the live\n         document type until docsumo_field_setup_save commits\
+    \ the draft."
+- name: docsumo_field_setup_update_field_settings
+  description: "Apply block settings for a field (add/remove/update blocks via full PATCH body).\n\nMirrors\
+    \ the Field Setup sidebar Apply action: sends optional_settings,\nblock_settings, references, and\
+    \ data_type to the backend.\n\nArgs:\n    params: doc_type, field_id, data_type, block_settings, optional_settings,\
+    \ references.\n\nReturns:\n    JSON update response."
+- name: docsumo_field_setup_add_section
+  description: "Add a new section to the document type field structure.\n\nReturns:\n    JSON acknowledging\
+    \ the draft change. Nothing reaches the live\n         document type until docsumo_field_setup_save\
+    \ commits the draft."
+- name: docsumo_field_setup_rename_section
+  description: "Rename an existing section.\n\nReturns:\n    JSON acknowledging the draft change. Nothing\
+    \ reaches the live\n         document type until docsumo_field_setup_save commits the draft."
+- name: docsumo_field_setup_get_section_prompt
+  description: "Fetch the section-level extraction prompt.\n\nReturns:\n    JSON with the section's current\
+    \ extraction prompt."
+- name: docsumo_field_setup_update_section_prompt
+  description: "Update the section-level extraction prompt.\n\nReturns:\n    JSON acknowledging the draft\
+    \ change. Nothing reaches the live\n         document type until docsumo_field_setup_save commits\
+    \ the draft."
+- name: docsumo_field_setup_add_field
+  description: "Add a field or table column under a section or table.\n\nReturns:\n    JSON acknowledging\
+    \ the draft change. Nothing reaches the live\n         document type until docsumo_field_setup_save\
+    \ commits the draft."
+- name: docsumo_field_setup_rename_field
+  description: "Rename a field or table column.\n\nReturns:\n    JSON acknowledging the draft change.\
+    \ Nothing reaches the live\n         document type until docsumo_field_setup_save commits the draft."
+- name: docsumo_field_setup_change_field_type
+  description: "Change a field's data type (may reset block settings depending on change_type).\n\nReturns:\n\
+    \    JSON acknowledging the draft change. Nothing reaches the live\n         document type until docsumo_field_setup_save\
+    \ commits the draft."
+- name: docsumo_field_setup_reorder_fields
+  description: "Change display order of a field or table column.\n\nReturns:\n    JSON acknowledging the\
+    \ draft change. Nothing reaches the live\n         document type until docsumo_field_setup_save commits\
+    \ the draft."
+- name: docsumo_field_setup_delete
+  description: "Delete fields, table columns, and/or entire sections.\n\nReturns:\n    JSON acknowledging\
+    \ the draft change. Nothing reaches the live\n         document type until docsumo_field_setup_save\
+    \ commits the draft."
+- name: docsumo_field_setup_set_visibility
+  description: "Show or hide a field or table column.\n\nReturns:\n    JSON acknowledging the draft change.\
+    \ Nothing reaches the live\n         document type until docsumo_field_setup_save commits the draft."
+- name: docsumo_field_setup_run_test
+  description: "Run test for a field block configuration against a document.\n\nPass the full POST body\
+    \ in payload (doc_type, field_id, doc_id, data_type,\nfield_type, block config, reference_values,\
+    \ etc.) as the field editor builds it.\n\nReturns:\n    JSON with run test result, citations, and\
+    \ validation_message."
+- name: docsumo_field_setup_generate_code
+  description: "Generate custom Python code for a field block from a natural-language prompt.\n\nReturns:\n\
+    \    JSON with generated code in data."
+- name: docsumo_field_setup_get_annotated_data
+  description: "Fetch annotated field outputs for a document (run test context).\n\nReturns:\n    JSON\
+    \ annotated data used when executing block run tests."
+- name: docsumo_field_setup_get_edit_field_bboxes
+  description: "Fetch document bounding boxes for the edit-field viewer.\n\nReturns:\n    JSON with each\
+    \ field's bounding box on the document, for drawing\n         the review overlay."
+- name: docsumo_create_case
+  description: "Create a new case instance under a case type.\n\nCreates a case based on the specified\
+    \ case type configuration. If a custom\ncase_name is provided it is used (with a count suffix); otherwise\
+    \ the\ndefault name is derived from the case type name and count.\n\nArgs:\n    params: Validated\
+    \ input parameters containing:\n        - casetype_id (str): Case type ID to create a case for (required)\n\
+    \        - workflow_version (str): \"published\" (default) or \"draft\"\n        - case_name (str\
+    \ | None): Optional custom case name\n\nReturns:\n    JSON with the newly created case's identifier,\
+    \ metadata, and\n         initial configuration."
+- name: docsumo_update_case
+  description: "Update one or many cases (single or bulk via select_all).\n\nUpdates case_name, assigned_to,\
+    \ and/or stage for either a specific list of\ncase_ids or all cases in a casetype (excluding deselected_case_ids).\n\
+    \nArgs:\n    params: Validated input parameters containing:\n        - case_ids (list[str] | None):\
+    \ Case IDs to update (required when select_all is false)\n        - case_name (str | None): Updated\
+    \ case name\n        - assigned_to (list[dict] | None): Updated assignees as [{user_id, full_name}]\n\
+    \        - stage (str | None): Updated stage ID\n        - select_all (bool): Update all cases in\
+    \ the casetype (default: false)\n        - casetype_id (str | None): Case type ID (required when select_all\
+    \ is true)\n        - deselected_case_ids (list[str] | None): Case IDs to exclude when select_all\
+    \ is true\n\nReturns:\n    JSON confirming the case update."
+- name: docsumo_delete_cases
+  description: "Delete one or multiple cases within a case type.\n\nPermanently removes the specified\
+    \ cases (or all cases in the casetype when\nselect_all is true, excluding deselected_case_ids). Only\
+    \ cases belonging to\nthe specified case type and organization are deleted.\n\nArgs:\n    params:\
+    \ Validated input parameters containing:\n        - casetype_id (str): Case type ID the cases belong\
+    \ to (required)\n        - case_ids (list[str] | None): Case IDs to delete (required when select_all\
+    \ is false)\n        - select_all (bool): Delete all cases in the casetype (default: false)\n    \
+    \    - deselected_case_ids (list[str] | None): Case IDs to exclude when select_all is true\n\nReturns:\n\
+    \    JSON with deleted_count and the list of case_ids that were deleted."
+- name: docsumo_list_case_documents
+  description: "List all documents associated with a specific case.\n\nReturns each document's metadata,\
+    \ status, review URL and document type. A\ncase id that does not exist returns an empty list rather\
+    \ than an error, so\nan empty result does not mean the case has no documents.\n\nArgs:\n    params:\
+    \ Validated input parameters containing:\n        - case_id (str): Case ID to list documents for (required)\n\
+    \        - filter_split (bool): When true, filters out split child documents (default: false)\n\n\
+    Returns:\n    JSON with a documents array containing doc_id, case_id, status,\n         title, type,\
+    \ type_title, review_url, created_at_iso, modified_at_iso."
+- name: docsumo_transfer_cases_by_stage
+  description: "Bulk transfer all cases from one stage to another.\n\nUpdates the stage_id of every case\
+    \ currently in transfer_from_stage to\ntransfer_to_stage within the authenticated organization.\n\n\
+    Args:\n    params: Validated input parameters containing:\n        - transfer_from_stage (str): Source\
+    \ stage ID (required)\n        - transfer_to_stage (str): Destination stage ID (required)\n\nReturns:\n\
+    \    JSON confirming the transfer operation."
+- name: docsumo_get_stage_count
+  description: "Get the count of cases in a particular stage.\n\nA count only — for the cases themselves\
+    \ use docsumo_list_cases with a stage\nfilter. A stage id that does not exist returns zero rather\
+    \ than an error.\n\nArgs:\n    params: Validated input parameters containing:\n        - stage_id\
+    \ (str): Stage ID to count cases for (required)\n\nReturns:\n    JSON with ``data.stage_id`` and ``data.count``."
+- name: docsumo_manage_case_fields
+  description: "Add, update, or delete case fields for a case type (unified endpoint).\n\nA single endpoint\
+    \ that performs add / update / delete based on the action\nparameter. Field IDs are auto-generated\
+    \ on add.\n\nArgs:\n    params: Validated input parameters containing:\n        - action (str): \"\
+    add\", \"update\", or \"delete\" (required)\n        - casetype_id (str): Case type ID to manage fields\
+    \ for (required)\n        - case_field (CaseFieldInput | None): Field data (label, Description, type).\n\
+    \          Required for add and update; not needed for delete.\n        - field_id (str | list[str]\
+    \ | None): Field ID(s). Required for update\n          and delete; not needed for add.\n        -\
+    \ validation_code (str | None): Optional validation code.\n\nReturns:\n    JSON with casetype_id and\
+    \ the operation result."
+- name: docsumo_get_case_fields
+  description: "Get all case fields configured for a case type.\n\nThe fields that belong to the case\
+    \ itself, rather than to its documents. A\ncase type id that does not exist returns an empty list\
+    \ rather than an error.\n\nArgs:\n    params: Validated input parameters containing:\n        - casetype_id\
+    \ (str): Case type ID to fetch fields for (required)\n\nReturns:\n    JSON with ``data.casetype_id``\
+    \ and ``data.case_fields``. A case type\n         with no case-level fields returns an empty list."
+- name: docsumo_get_case_dropdown_options
+  description: "Fetch dropdown options (stages, fields, doctypes) for case blocks.\n\nReturns the dropdown\
+    \ options used to build UI dropdowns in case update\nworkflows, organized into case_metadata (case\
+    \ name, stages, assignee,\ndocument options) and case_data (case field and document field options).\n\
+    \nArgs:\n    params: Validated input parameters containing:\n        - casetype_id (str): Case type\
+    \ ID to fetch dropdown options for (required)\n\nReturns:\n    JSON with a ``data`` tree of ``{id,\
+    \ label, type, children}`` nodes —\n         the grouped pickers a case-update form offers: stages,\
+    \ assignees,\n         documents, and case and document fields."
+- name: docsumo_get_doctype_fields_for_casetype
+  description: "Get the fields of all document types configured for a case type.\n\nReturns field definitions\
+    \ for each doctype associated with the specified\ncase type, organized by doctype. Provides a comprehensive\
+    \ view of all\navailable fields across all doctypes in the case type configuration.\n\nArgs:\n   \
+    \ params: Validated input parameters containing:\n        - casetype_id (str): Case type ID to retrieve\
+    \ doctype fields for (required)\n\nReturns:\n    JSON with field definitions grouped by document type,\
+    \ including\n         field names, types, validation rules, and other metadata."
+- name: docsumo_list_case_templates
+  description: "List all out-of-the-box case templates available to the organization.\n\nReturns case\
+    \ templates that can be used as starting points for creating new\ncase types, including their metadata\
+    \ and configuration details.\n\nArgs:\n    params: Validated input parameters (no fields required).\n\
+    \nReturns:\n    JSON with a ``data`` list of templates. An account with none set up\n         gets\
+    \ an empty list rather than an error."
+- name: docsumo_list_casetypes
+  description: "List the organization's configured case types with their names and IDs.\n\nReturns each\
+    \ case type's casetype_id, casetype_name, and the linked\nworkflow_id/workflow_status. Use this to\
+    \ discover casetype_id values before\ncalling docsumo_get_casetype_schema, docsumo_list_cases and\
+    \ the rest.\n\nCase types are derived from the workflows listing (each case type is linked\n1:1 to\
+    \ a workflow); a case type created without an attached workflow will not\nappear.\n\nArgs:\n    params:\
+    \ Validated input parameters (no fields required).\n\nReturns:\n    JSON with a casetypes array and\
+    \ total count."
+- name: docsumo_list_cases
+  description: "List cases for a case type with filtering, pagination, and search.\n\nSupports filtering\
+    \ by stage, workflow state, assignee, modifier, and date\nranges, plus a search query (case_id:value,\
+    \ case_name:value, or free text).\nCase field IDs in include_case_fields are hydrated onto each row\
+    \ as\ncase_fields_flat.\n\nArgs:\n    params: Validated input parameters containing:\n        - casetype_id\
+    \ (str): Case type ID to list cases for (required)\n        - limit (int): Maximum cases to return,\
+    \ 1-100 (default: 20)\n        - offset (int): Pagination offset (default: 0)\n        - sort_by (str\
+    \ | None): Sort field and direction, e.g. \"created_at.desc\"\n        - stage (list[str] | None):\
+    \ Filter by one or more stage IDs\n        - workflow_state (list[str] | None): Filter by workflow\
+    \ state\n        - assigned_to (list[str] | None): Filter by assigned user IDs\n        - modified_by\
+    \ (list[str] | None): Filter by modifier user IDs\n        - created_at (list[str] | None): Created\
+    \ date range filters (e.g. [\"gte:2024-01-01\"])\n        - modified_at (list[str] | None): Modified\
+    \ date range filters\n        - q (str | None): Search query (case_id:value, case_name:value, or text)\n\
+    \        - include_case_fields (list[str] | None): Case field IDs to hydrate per row\n\nReturns:\n\
+    \    JSON with a documents array, total count, and _pagination metadata\n         including has_more\
+    \ and next_offset fields."
+- name: docsumo_get_case_counts
+  description: "Get aggregated case counts for a case type.\n\nCounts only — for the cases themselves\
+    \ use docsumo_list_cases. A case type\nid that does not exist returns zeroes rather than an error.\n\
+    \nArgs:\n    params: Validated input parameters containing:\n        - casetype_id (str): Case type\
+    \ ID to get counts for (required)\n\nReturns:\n    JSON with ``data.counts`` keyed by status (``all``\
+    \ plus each stage\n         or workflow state), and ``data.metadata`` naming the case type."
+- name: docsumo_get_case_overview
+  description: "Where a case stands: its stage, and how its documents are progressing.\n\nThe case's own\
+    \ metadata — including the stage it sits in — plus a\nper-document-type breakdown of its documents\
+    \ by status. A case id that does\nnot exist returns an empty overview rather than an error.\n\nArgs:\n\
+    \    params: Validated input parameters containing:\n        - case_id (str): Case ID to retrieve\
+    \ the overview for (required)\n\nReturns:\n    JSON with case_overview (metadata) and case_doctypes\
+    \ (per-doctype\n         document status counts)."
+- name: docsumo_get_case_configuration
+  description: "Get the configuration of a case type.\n\nReturns the linked ``workflow_id``, the document\
+    \ types the case expects\n(each with whether it is required and how many are wanted), and the stages\
+    \ a\ncase moves through. For the fields and per-doctype schema instead, use\ndocsumo_get_casetype_schema.\n\
+    \nArgs:\n    params: Validated input parameters containing:\n        - casetype_id (str): Case type\
+    \ ID to retrieve configuration for (required)\n\nReturns:\n    JSON with org_id, casetype_id, casetype_name,\
+    \ and casetype_config."
+- name: docsumo_update_case_configuration
+  description: "Update a case type's configuration.\n\nSupports independently updating case_doctypes,\
+    \ is_disabled, validation_custom_code,\nupdated_stages (add/edit/delete/reorder), casetype_name, display_name_template,\n\
+    and auto_refresh_case_views. Only provided fields are applied.\n\nFor stages: add = omit id (auto-generated);\
+    \ edit = include id + updated fields;\ndelete = omit from list (cases on deleted stages move to first\
+    \ stage); reorder\n= array order is the new stage order (1-indexed).\n\nArgs:\n    params: Validated\
+    \ input parameters containing:\n        - casetype_id (str): Case type ID to update (required)\n \
+    \       - case_doctypes (list | None): Full replacement of doctypes (doc_type, is_required, count)\n\
+    \        - is_disabled (bool | None): Enable/disable the case type\n        - validation_custom_code\
+    \ (str | None): Custom validation code (new version)\n        - updated_stages (list | None): Full\
+    \ replacement of stages (add/edit/delete/reorder)\n        - casetype_name (str | None): New case\
+    \ type display name\n        - display_name_template (str | None): Template for composed case display\
+    \ name\n        - auto_refresh_case_views (bool | None): Auto-refresh views after field edits\n\n\
+    Returns:\n    JSON with the updated case type configuration."
+- name: docsumo_get_casetype_data
+  description: "Get case type data: configured stages and the next case number.\n\nReturns the configured\
+    \ stages (id, label, color, order) and the\ntotal_cases_count + 1 value used to derive the next case's\
+    \ default name.\n\nArgs:\n    params: Validated input parameters containing:\n        - casetype_id\
+    \ (str): Case type ID to retrieve data for (required)\n\nReturns:\n    JSON with ``data.stages`` —\
+    \ each ``{id, label, color, order}`` in the\n         order a case moves through them — plus ``total_cases_count``\
+    \ and the\n         case type's ``upload_email``."
+- name: docsumo_duplicate_casetype
+  description: "Duplicate an existing case type to create a new one.\n\nCopies the source case type's\
+    \ configuration (doctypes, workflow, settings)\ninto a new case type with the provided name.\n\nArgs:\n\
+    \    params: Validated input parameters containing:\n        - source_casetype_id (str): Case type\
+    \ ID to duplicate from (required)\n        - casetype_name (str): Name for the new duplicated case\
+    \ type (required)\n        - case_doctypes (list[str]): Doctype IDs to include in the new case type\n\
+    \        - new_doctypes (list[str]): Custom doctype titles to create and include\n        - default\
+    \ (bool): Whether the new case type is the default (default: true)\n        - is_disabled (bool):\
+    \ Whether the new case type is disabled (default: false)\n\nReturns:\n    JSON with the newly created\
+    \ duplicated case type details."
+- name: docsumo_delete_casetype
+  description: "Permanently delete a case type and all its associated data.\n\nCascade-deletes the casetype's\
+    \ workflow, validations, case fields, and drive\nnodes. This operation is irreversible.\n\nArgs:\n\
+    \    params: Validated input parameters containing:\n        - casetype_id (str): Case type ID to\
+    \ delete (required)\n\nReturns:\n    JSON acknowledging the deletion. It does not report what the\n\
+    \         cascade removed alongside it."
+- name: docsumo_create_casetype_via_agent
+  description: "Create a new case type via the agent endpoint (case + doctypes only).\n\nCreates a case\
+    \ type and optionally attaches standard doctypes and/or new\ncustom doctypes. Does NOT add fields,\
+    \ blocks, or sections (use the doctype\nagent endpoints for those). Duplicate casetype names are auto-resolved.\n\
+    \nArgs:\n    params: Validated input parameters containing:\n        - casetype_name (str): Display\
+    \ name for the case type (required)\n        - casetype_id (str): Identifier for the case type (required)\n\
+    \        - workflow_id (str | None): Optional existing workflow ID to attach\n        - standard_doctypes\
+    \ (list[str]): Predefined doctype IDs (e.g. [\"invoice\"])\n        - new_doctypes (list[str]): Custom\
+    \ doctype titles (e.g. [\"Purchase Order\"])\n\nReturns:\n    JSON with casetype_id, casetype_name,\
+    \ is_disabled, and casetype_config\n         (including case_doctypes with doctype_title populated).\
+    \ May include\n         field_setup_warnings if standard doctype field setup was skipped."
+- name: docsumo_update_casetype_via_agent
+  description: "Update a case type via the agent endpoint (add/update/remove semantics).\n\nAll request\
+    \ fields are optional; only provided fields are applied. Supports\nupdating casetype_name, is_disabled,\
+    \ validation_custom_code, stages\n(add/update/delete), case_fields (add/update/delete), and doctypes\n\
+    (add standard, add new custom, remove).\n\nStage rules: first/last stages stay fixed; middle stages\
+    \ can be added\n(between first and last), updated by id, or deleted (cannot delete first/last).\n\n\
+    Args:\n    params: Validated input parameters containing:\n        - casetype_id (str): Case type\
+    \ ID to update (required)\n        - casetype_name (str | None): New display name\n        - is_disabled\
+    \ (bool | None): Enable/disable the case type\n        - validation_custom_code (str | None): Custom\
+    \ validation code (new version)\n        - add_stages (list | None): Stages to add (label, color,\
+    \ Description)\n        - update_stages (list | None): Existing stages to update by id\n        -\
+    \ delete_stages (list[str] | None): Stage IDs to delete\n        - add_case_fields (list | None):\
+    \ Case fields to add (label, Description, type)\n        - update_case_fields (list | None): Existing\
+    \ case fields to update by field_id\n        - delete_case_fields (list[str] | None): Case field IDs\
+    \ to delete\n        - add_standard_doctypes (list[str] | None): Predefined doctype IDs to add\n \
+    \       - add_new_doctypes (list[str] | None): Custom doctype titles to add\n        - remove_doctypes\
+    \ (list[str] | None): Doctype IDs to remove\n\nReturns:\n    JSON with casetype_id, casetype_name,\
+    \ is_disabled, and casetype_config.\n         May include field_setup_warnings."
+- name: docsumo_get_casetype_schema
+  description: "Fetch the full schema for a case type in a single batched call.\n\nReturns the case-type\
+    \ meta (name, stages, case_fields, ...) plus, for every\nattached doctype: doctype_title, doctype_description,\
+    \ additional_params,\ndoctype_settings (image_quality, stp), and the sections / fields / blocks /\n\
+    optional_settings / columns tree.\n\nReferences inside block prompts and custom_code are rewritten\
+    \ from the\nstored numeric ``<@<field_id>>`` form into the agent-friendly\n``<@Section___Field>``\
+    \ (or ``<@Section___Table___Column>``) form.\n\nA case type carries a full schema per attached doctype,\
+    \ so pass ``summary``\nto see what it extracts without the prompt wording.\n\nArgs:\n    params: casetype_id,\
+    \ and summary for the compact form.\n\nReturns:\n    JSON with the case-type meta and per-doctype\
+    \ schema tree. With\n         ``summary`` on, each section carries ``section_id`` and its fields\n\
+    \         as ``field_id``, ``type`` and a table's ``columns`` only."
+- name: docsumo_list_case_list_tabs
+  description: "List pinned Case List tabs visible to the caller for a case type.\n\nA tab is visible\
+    \ if it is shared (user_id is null) or personal to the\ncaller (user_id matches). Tabs are ordered\
+    \ by order ascending.\n\nArgs:\n    params: Validated input parameters containing:\n        - casetype_id\
+    \ (str): Case type ID to list tabs for (required)\n\nReturns:\n    JSON with ``data.tabs``, in display\
+    \ order. A case type with nothing\n         pinned returns an empty list."
+- name: docsumo_create_case_list_tab
+  description: "Create a new pinned tab on a case type.\n\nThe filter is a\nstructured filter spec (FilterSpec);\
+    \ columns are column IDs (built-in keys\nor casefield_<id>); sort is a list of [field, direction]\
+    \ tuples.\n\nArgs:\n    params: Validated input parameters containing:\n        - casetype_id (str):\
+    \ Case type ID to create the tab on (required)\n        - name (str): Tab name shown in the strip\
+    \ (1-80 chars, required)\n        - filter (dict): Structured filter spec (default: empty dict)\n\
+    \        - columns (list[str]): Column IDs (default: empty list)\n        - sort (list[list]): Sort\
+    \ tuples, e.g. [[\"created_at\", -1]] (default: empty)\n        - order (int | None): Display order;\
+    \ appended to end if omitted\n        - is_shared (bool): True = visible to everyone; False = personal\
+    \ (default: false)\n\nReturns:\n    JSON with the created tab."
+- name: docsumo_update_case_list_tab
+  description: "Partially update a pinned case list tab.\n\nOnly provided fields are applied (exclude_unset\
+    \ semantics). System-default\ntabs are partially immutable.\n\nArgs:\n    params: Validated input\
+    \ parameters containing:\n        - casetype_id (str): Case type ID the tab belongs to (required)\n\
+    \        - view_id (str): Tab view ID to update (required)\n        - name (str | None): New tab name\
+    \ (1-80 chars)\n        - filter (dict | None): New structured filter spec\n        - columns (list[str]\
+    \ | None): New column IDs\n        - sort (list[list] | None): New sort tuples\n        - order (int\
+    \ | None): New display order\n        - is_shared (bool | None): New shared/personal flag\n\nReturns:\n\
+    \    JSON with the updated tab."
+- name: docsumo_delete_case_list_tab
+  description: "Delete a pinned case list tab.\n\nSystem-default tabs cannot be deleted.\n\nArgs:\n  \
+    \  params: Validated input parameters containing:\n        - casetype_id (str): Case type ID the tab\
+    \ belongs to (required)\n        - view_id (str): Tab view ID to delete (required)\n\nReturns:\n \
+    \   JSON with the deleted view_id."
+- name: docsumo_get_case_list_tab_counts
+  description: "Get badge counts for pinned case list tabs.\n\nReturns a {view_id: count} mapping for\
+    \ the given tab view_ids. Drives tab\nbadge counts in the UI.\n\nArgs:\n    params: Validated input\
+    \ parameters containing:\n        - casetype_id (str): Case type ID the tabs belong to (required)\n\
+    \        - view_ids (list[str]): Tab view IDs to compute counts for (required, min 1)\n\nReturns:\n\
+    \    JSON with a counts object mapping view_id to case count."
+- name: docsumo_get_case_presigned_upload_url
+  description: "Generate presigned upload and download URLs for case files.\n\nGenerates signed URLs that\
+    \ allow direct upload to the configured storage\nprovider (S3 or GCS) without going through the API\
+    \ server. Files are saved\nto /agent/{org_id}/{workflow_id}/{filename}. Returns both upload and\n\
+    download URLs per file with per-file status, so files can be accessed\nimmediately after upload.\n\
+    \nSupports any file type. Content types are auto-detected from file\nextensions when not explicitly\
+    \ provided; unknown types default to\n\"application/octet-stream\".\n\nArgs:\n    params: Validated\
+    \ input parameters containing:\n        - files (list[FileUploadItemInput]): Files to upload, each\
+    \ with id,\n          filename, and optional content_type (required, min 1)\n        - workflow_id\
+    \ (str): Workflow ID to associate the files with (required)\n        - expiration (int): Seconds until\
+    \ the presigned URL expires (1-604800, default: 1000)\n        - storage_provider (str): \"s3\" or\
+    \ \"gcs\" (default: \"gcs\")\n\nReturns:\n    JSON with a presigned_urls array; each entry has id,\
+    \ status\n         (\"success\" or \"error\"), presigned_upload_url, presigned_download_url,\n   \
+    \      file_key, filename, original_filename, content_type, and (on error) error."
+- name: docsumo_get_case_validations
+  description: "Run the case's validation checks and return what they found.\n\nThis executes the case\
+    \ type's saved validation code against the case, so it\ncosts a run rather than reading a stored result.\
+    \ For the rows a review\nscreen already shows, read them from docsumo_get_case_view instead. Fails\
+    \ if\nthe validation code itself errors.\n\nArgs:\n    params: Validated input parameters containing:\n\
+    \        - case_id (str): Case ID to run validations for (required)\n\nReturns:\n    JSON with ``data.validation_data``\
+    \ — one row per check, filtered to\n         ``result_in`` when given. A case whose type has no validation\
+    \ code\n         answers an empty list and a ``note`` saying so; an unknown case\n         id is an\
+    \ error."
+- name: docsumo_preview_case_validations
+  description: "Preview validation custom code against a case without saving it.\n\nRuns the provided\
+    \ custom_code against the case and returns the validation\noutput, without persisting the code as\
+    \ a new version.\n\nArgs:\n    params: Validated input parameters containing:\n        - case_id (str):\
+    \ Case ID to preview validations for (required)\n        - custom_code (str): Custom validation code\
+    \ to preview (required)\n\nReturns:\n    JSON with the preview validation results string."
+- name: docsumo_get_validation_refresh_status
+  description: "Get the validation refresh status for a case.\n\nReturns whether a validation refresh\
+    \ is required for the case, the current\nworkflow_state, and the casetype's auto_refresh_case_views\
+    \ setting.\n\nArgs:\n    params: Validated input parameters containing:\n        - case_id (str):\
+    \ Case ID to check refresh status for (required)\n\nReturns:\n    JSON with is_validation_refresh_required,\
+    \ workflow_state, and\n         auto_refresh_case_views."
+- name: docsumo_download_case_validations
+  description: "Download validation results for cases as an XLSX workbook.\n\nBuilds an XLSX workbook\
+    \ of validation results for the specified cases\n(table headers, data rows, status colors, hyperlinks\
+    \ to review URLs) and\nuploads it to S3. Returns a download URL.\n\nArgs:\n    params: Validated input\
+    \ parameters containing:\n        - casetype_id (str): Case type ID to download validations for (required)\n\
+    \        - case_ids (list[str]): List of case IDs to include in the download (required, min 1)\n\n\
+    Returns:\n    JSON with a download_url for the generated XLSX file."
+- name: docsumo_list_validation_code_versions
+  description: "List all validation custom code versions for a case type.\n\nReturns the versioned history\
+    \ of validation custom code saved for the\nspecified case type.\n\nArgs:\n    params: Validated input\
+    \ parameters containing:\n        - casetype_id (str): Case type ID to list validation code versions\
+    \ for (required)\n\nReturns:\n    JSON with a ``data`` list, newest first, each carrying\n       \
+    \  ``version``, ``author_user_id`` and ``last_edited_on``. Pass a\n         ``version`` to docsumo_get_validation_code_version\
+    \ for the code."
+- name: docsumo_get_validation_code_version
+  description: "Get a specific validation custom code version for a case type.\n\nReturns the validation\
+    \ custom code for the specified version number.\n\nArgs:\n    params: Validated input parameters containing:\n\
+    \        - casetype_id (str): Case type ID the version belongs to (required)\n        - version (int):\
+    \ Version number to retrieve (required, >= 1)\n\nReturns:\n    JSON with the validation custom code\
+    \ for the requested version."
+- name: docsumo_get_case_view
+  description: "Get the output of a specific view block for a case.\n\nReturns what one tab of the case\
+    \ review screen renders.\n\nArgs:\n    params: Validated input parameters containing:\n        - case_id\
+    \ (str): Case ID to fetch the view for (required)\n        - block_id (str): View block ID to fetch\
+    \ (required)\n\nReturns:\n    The tab's rendered content — its sections and widgets as the review\n\
+    \         screen draws them. With ``summary`` on, a compact shape instead:\n         ``title``, ``tab_sequence``,\
+    \ ``is_hidden``, a ``sections`` count,\n         the ``widgets`` and their types, and ``renders``."
+- name: docsumo_get_case_tabs
+  description: "Compactly summarize a case's view tabs to self-verify the review UI.\n\nUse this instead\
+    \ of fetching each full view (which can be tens of KB) when you\njust need to confirm a tab exists\
+    \ and will render. For every view tab it returns\nid, title, tab_sequence, is_hidden, the section\
+    \ count, per-widget counts, and a\n`renders` flag. The built-in 'Overview' tab is always present and\
+    \ not listed.\n\nArgs:\n    params: case_id.\n\nReturns:\n    JSON {case_id, note, tabs:[{id,title,tab_sequence,is_hidden,sections,widgets,renders}]}."
+- name: docsumo_list_workflow_blocks
+  description: "List the block types a workflow can be built from.\n\nThe catalog of what exists — upload,\
+    \ data_extractor, python_code, router,\nexport and the rest — not what any one workflow contains.\
+    \ For the blocks in\na particular workflow, read docsumo_get_workflow.\n\nArgs:\n    params: optional\
+    \ hidden flag.\n\nReturns:\n    JSON with ``data.blocks`` — each with its ``type``, ``name``,\n  \
+    \       ``description``, ``category`` and the ``config`` fields it takes —\n         and ``data.learning_blocks``\
+    \ for the trainable ones."
+- name: docsumo_get_block_schema
+  description: "Get input/output schemas for one or more workflow block types.\n\nUse to understand required\
+    \ config fields and available upstream references\nwhen configuring blocks in a workflow graph.\n\n\
+    Args:\n    params: block_type list and optional refresh flag.\n\nReturns:\n    JSON with ``data``\
+    \ keyed by block type, each giving the inputs that\n         type accepts and the outputs it produces."
+- name: docsumo_generate_workflow_code
+  description: "Generate or adjust Python/export/validation code for a workflow block.\n\nArgs:\n    params:\
+    \ prompt, block_type, code_schema, inputs,\n        existing code, workflow_id, block_id, and optional\
+    \ additional_keys.\n\nReturns:\n    JSON with generated_code and optional summary."
+- name: docsumo_generate_router_conditions
+  description: "Generate routing conditions for a router block using LLM.\n\nArgs:\n    params: prompt,\
+    \ block_type, code_schema,\n        workflow_id, block_id.\n\nReturns:\n    JSON with generated router\
+    \ condition values."
+- name: docsumo_list_llm_models
+  description: "List supported LLM models and reasoning levels for llm workflow blocks.\n\nArgs:\n   \
+    \ params: No parameters required.\n\nReturns:\n    JSON with ``data`` keyed by provider, each a list\
+    \ of\n         ``{model, reasoning_effort}`` — the models that provider offers and\n         the effort\
+    \ levels each accepts."
+- name: docsumo_resolve_block_inputs
+  description: "Build a block's real runtime input envelope from execution history.\n\nArgs:\n    params:\
+    \ workflow_id, block_id, optional execution_id.\n\nReturns:\n    JSON with ``documents`` (each with\
+    \ ``doc_id``, ``title``,\n         ``doc_type`` and ``status``), ``case`` (its id, name, stage and\n\
+    \         status), and the outputs of the blocks upstream of this one — the\n         envelope the\
+    \ block's code receives as its input."
+- name: docsumo_resolve_view_inputs
+  description: "Build a view block's inputs from upstream widget outputs.\n\nArgs:\n    params: workflow_id,\
+    \ view_id, optional execution_id.\n\nReturns:\n    JSON map of widget block name to output."
+- name: docsumo_get_block_code
+  description: "Get pinned Python code for a workflow block.\n\nArgs:\n    params: workflow_id, block_id,\
+    \ optional version_id.\n\nReturns:\n    JSON with version metadata and nested code at data.data.code."
+- name: docsumo_save_block_code
+  description: "Save Python code for a workflow block, as the editor's code panel does.\n\nOnly the code\
+    \ is stored. With ``publish`` (the default) it becomes a\npublished version, as the editor's Save\
+    \ makes it; otherwise a draft version.\n\nArgs:\n    params: workflow_id, block_id, code, publish\
+    \ flag.\n\nReturns:\n    JSON with ``version_id`` (the version the save created) and ``status``."
+- name: docsumo_patch_block_code
+  description: "Patch a block's saved code with literal find/replace edits (no full re-send).\n\nUse this\
+    \ to fix a few lines of an already-saved block instead of re-sending the\nwhole script via docsumo_save_block_code.\
+    \ Each edit's `find` must occur at least\nonce or the patch is rejected. The result is compiled, saved,\
+    \ and (on publish)\nrepinned into the draft.\n\nArgs:\n    params: workflow_id, block_id, edits, publish.\n\
+    \nReturns:\n    JSON with ok, version_id, status, edits_applied, code_length."
+- name: docsumo_list_block_code_versions
+  description: "List code version history for a workflow block.\n\nArgs:\n    params: workflow_id and\
+    \ block_id.\n\nReturns:\n    JSON with ``data.versions``, newest first. A block whose code was\n \
+    \        never pinned returns an empty list."
+- name: docsumo_get_block_conversation
+  description: "Get prompt history for a workflow block.\n\nArgs:\n    params: workflow_id and block_id.\n\
+    \nReturns:\n    JSON with ``data.entries`` — the prompts and replies that shaped\n         this block's\
+    \ code, oldest first. Empty for a block never edited by\n         prompt."
+- name: docsumo_append_block_conversation
+  description: "Append entries to a block's conversation history.\n\nArgs:\n    params: workflow_id, block_id,\
+    \ entries.\n\nReturns:\n    JSON confirmation."
+- name: docsumo_clear_block_conversation
+  description: "Clear prompt history for a workflow block.\n\nArgs:\n    params: workflow_id and block_id.\n\
+    \nReturns:\n    JSON confirmation."
+- name: docsumo_generate_and_save_block_code
+  description: "Generate block code against real inputs and save it, as the editor does.\n\nThe code is\
+    \ saved as a draft version and pointed to from the block, without\nbeing run — as the editor saves\
+    \ the code it generates — so a mistake in it\nshows only when the block next runs.\n\nArgs:\n    params:\
+    \ workflow_id, block_id, block_type, prompt,\n        and optional inputs, code, execution_id, retry\
+    \ settings.\n\nReturns:\n    JSON with ``code``, ``summary``, ``inputs`` (what the code was\n    \
+    \     generated against), ``version_id`` and ``status``."
+- name: docsumo_generate_many_block_codes
+  description: "Generate and save code for several blocks at once.\n\nEach block's code is saved as a\
+    \ draft version without being run.\n\nArgs:\n    params: workflow_id, jobs list, concurrency, pin.\n\
+    \nReturns:\n    JSON map from each job's block_id to its result — ``code``,\n         ``summary``,\
+    \ ``inputs``, ``version_id`` and ``status`` — or to\n         ``error`` for a job that failed."
+- name: docsumo_pin_block_versions
+  description: "Point several blocks at their code versions in one write to the draft.\n\nOne write rather\
+    \ than one per block, so the pins cannot overwrite each other.\nThe draft is read and written back\
+    \ whole, so a change made in the editor\nbetween the two is lost.\n\nArgs:\n    params: workflow_id\
+    \ and block_id->version_id mapping.\n\nReturns:\n    JSON with ``pinned`` and ``missing``, the block\
+    \ ids that were and\n         were not in the draft."
+- name: docsumo_apply_router_conditions
+  description: "Validate and write router conditions into the draft graph.\n\nArgs:\n    params: workflow_id,\
+    \ block_id, conditions array.\n\nReturns:\n    JSON with ok flag and conditional_values or validation\
+    \ messages."
+- name: docsumo_validate_router_conditions
+  description: "Structural pre-check for router condition JSON before applying to draft.\n\nArgs:\n  \
+    \  params: conditions array.\n\nReturns:\n    JSON with ``valid`` and ``issues`` — one plain-language\
+    \ entry per\n         problem found. Structure only: it does not check that the fields a\n       \
+    \  condition names exist."
+- name: docsumo_list_drive_tree
+  description: "List files and folders under a workflow drive node.\n\nArgs:\n    params: workflow_id,\
+    \ node_id, sort_by, search q,\n        include_pending.\n\nReturns:\n    JSON with a ``data`` list\
+    \ of nodes, each carrying ``id``,\n         ``parent_id``, ``name``, ``type`` (file or folder), timestamps,\n\
+    \         ``file_id`` where it is a file, ``case_id`` and ``is_case_folder``\n         where it belongs\
+    \ to a case, and nested ``children``."
+- name: docsumo_create_drive_folder
+  description: "Create a folder node in the workflow drive.\n\nArgs:\n    params: workflow_id, parent_node_id,\
+    \ name.\n\nReturns:\n    JSON with the created folder node."
+- name: docsumo_create_agent_drive_node
+  description: "Register a file or folder in the workflow drive (agent API).\n\nUpload the file to GCS\
+    \ first, then call this with gcp_file_key for file nodes.\n\nArgs:\n    params: workflow_id, parent_node_id,\
+    \ name,\n        optional gcp_file_key and file_id.\n\nReturns:\n    JSON with the created drive node."
+- name: docsumo_create_artifact_node
+  description: "Register a file or folder under the workflow artifacts subtree.\n\nArgs:\n    params:\
+    \ workflow_id, parent_node_id, name,\n        optional gcp_file_key and file_id.\n\nReturns:\n   \
+    \ JSON with the created artifact node."
+- name: docsumo_list_drive_artifacts
+  description: "List all artifact nodes under the Artifacts folder (flat, recursive).\n\nArgs:\n    params:\
+    \ workflow_id.\n\nReturns:\n    JSON with a ``data`` list of artifact nodes, each carrying ``id``,\n\
+    \         ``parent_id``, ``name``, ``type``, ``file_id`` and timestamps."
+- name: docsumo_list_agent_drive_children
+  description: "List descendant drive nodes (agent API, flat up to depth levels).\n\nArgs:\n    params:\
+    \ workflow_id, node_id, depth,\n        include_artifacts.\n\nReturns:\n    JSON with a flat ``data``\
+    \ list of the nodes beneath the one asked\n         for, each carrying ``id``, ``parent_id``, ``name``,\
+    \ ``type`` and\n         ``file_id``. Flat rather than nested — read ``parent_id`` to rebuild\n  \
+    \       the tree."
+- name: docsumo_run_drive_workflow
+  description: "Trigger a workflow test run from selected drive files/folders.\n\nArgs:\n    params: workflow_id,\
+    \ selections tree, case_name,\n        mode (prod/test).\n\nReturns:\n    JSON with success/failed\
+    \ case run results."
+- name: docsumo_get_drive_job_status
+  description: "Poll an async drive run by its job id.\n\ndocsumo_list_workflow_test_cases reports a test\
+    \ case's ``drive_job.job_id``,\nand a drive run returns one when it starts.\n\nArgs:\n    params:\
+    \ job_id.\n\nReturns:\n    JSON with ``data.job_id``, ``data.status``, ``data.error`` (null\n    \
+    \     while healthy), and ``data.result`` naming the ``case_id`` and\n         ``case_name`` the run\
+    \ produced, its ``files_count`` and whether it\n         was a rerun."
+- name: docsumo_get_drive_case_status
+  description: "Get per-case run status and latest execution ID after a drive test run.\n\nArgs:\n   \
+    \ params: case_ids.\n\nReturns:\n    JSON with a ``data`` entry per case asked for: ``case_id``,\n\
+    \         ``case_name``, ``status``, and the ``run_id`` of its latest run."
+- name: docsumo_delete_drive_node
+  description: "Delete a file or folder from the workflow drive.\n\nArgs:\n    params: workflow_id, node_id.\n\
+    \nReturns:\n    JSON confirmation message."
+- name: docsumo_delete_artifact_node
+  description: "Delete an artifact node from the workflow artifacts subtree.\n\nArgs:\n    params: workflow_id,\
+    \ node_id.\n\nReturns:\n    JSON confirmation message."
+- name: docsumo_get_drive_presigned_upload_urls
+  description: "Get presigned upload URLs for files in a workflow drive folder.\n\nLow-level primitive:\
+    \ after calling this you must PUT the bytes to each URL\n(with the matching content-type) and call\
+    \ docsumo_ack_drive_file_upload per\nfile before running. For local files prefer the all-in-one\n\
+    docsumo_upload_drive_folder, which presigns +\nupload + ack for you; reach for this primitive only\
+    \ when adding files to an\nexisting node or when the folder tools are unavailable.\n\nArgs:\n    params:\
+    \ node_id, workflow_id, files metadata.\n\nReturns:\n    JSON with presigned_urls array."
+- name: docsumo_ack_drive_file_upload
+  description: "Mark a drive file as uploaded after PUTting bytes to the presigned URL.\n\nPart of the\
+    \ low-level presign flow (docsumo_get_drive_presigned_upload_urls -> PUT ->\nack -> docsumo_run_drive_folder).\
+    \ For local files, docsumo_upload_drive_folder\ndoes this ack step for you. Note: a drive run is\n\
+    gated on each file's is_uploaded flag; if a run later fails, verify the files\nshow is_uploaded=true\
+    \ via docsumo_list_drive_tree(include_pending=true).\n\nArgs:\n    params: workflow_id and file_id.\n\
+    \nReturns:\n    JSON with file_id and acknowledged flag."
+- name: docsumo_move_drive_node
+  description: "Move a file or folder to a new parent in the workflow drive.\n\nArgs:\n    params: workflow_id,\
+    \ source_node, new_parent_node.\n\nReturns:\n    JSON confirmation."
+- name: docsumo_get_drive_file_preview
+  description: "Get a preview URL for an uploaded drive file.\n\nArgs:\n    params: workflow_id and file_id.\n\
+    \nReturns:\n    JSON with ``data.preview_url``."
+- name: docsumo_get_drive_node_download_url
+  description: "Get a signed download URL for a drive file or folder.\n\nArgs:\n    params: workflow_id\
+    \ and node_id.\n\nReturns:\n    JSON with ``data.download_url``, plus the node's ``name`` and\n  \
+    \       ``type`` — a folder downloads as an archive."
+- name: docsumo_upload_local_files_to_drive
+  description: "Upload local files to an existing drive folder via presigned URLs.\n\nArgs:\n    params:\
+    \ workflow_id, folder_id, file_paths.\n\nReturns:\n    JSON with folder_id, uploaded_files, file_count."
+- name: docsumo_update_drive_node
+  description: "Rename a drive file or folder.\n\nProtected nodes (root, case folders, artifact folders)\
+    \ cannot be renamed.\n\nArgs:\n    params: workflow_id, node_id, name.\n\nReturns:\n    JSON confirmation\
+    \ with the new name."
+- name: docsumo_update_artifact_node
+  description: "Bump an artifact node's modified_at after overwriting its content in storage.\n\nPairs\
+    \ with docsumo_create_artifact_node / docsumo_delete_artifact_node.\n\nArgs:\n    params: workflow_id,\
+    \ node_id.\n\nReturns:\n    JSON confirmation."
+- name: docsumo_list_workflow_executions
+  description: "Search workflow execution runs with filters and pagination, newest run first.\n\nArgs:\n\
+    \    params: page, limit, workflow_id, status,\n        run_id, q, and other filters.\n\nReturns:\n\
+    \    JSON with ``data.executions`` and ``pagination`` with ``page``, ``limit``, ``total``, ``total_pages``,\
+    \ ``has_next`` and ``has_prev``. An account with no runs\n         returns an empty list."
+- name: docsumo_get_workflow_execution_history
+  description: "Get block-level execution history for a workflow run.\n\nUse after a drive test run to\
+    \ inspect block outputs and verify workflow behavior.\n\nArgs:\n    params: execution_id and optional\
+    \ block_id.\n\nReturns:\n    JSON with the run's ``id``, ``status``, ``run_mode``, the\n         ``case_id``\
+    \ and ``casetype_id`` it ran for, and ``traces`` — one\n         entry per block, in execution order,\
+    \ carrying its output."
+- name: docsumo_get_execution_dag
+  description: "Fetch the exact graph that ran for an execution, plus its graph_hash.\n\nThe publishability\
+    \ gate requires the current draft to hash to the same value as\nthis executed graph, so this is the\
+    \ ground truth for diagnosing why a workflow\nis not publishable (compare block configs / graph_hash\
+    \ against the draft).\n\nArgs:\n    params: execution_id.\n\nReturns:\n    JSON with ``data.execution_id``,\
+    \ the ``graph`` that ran as\n         ``blocks`` and ``edges``, its ``graph_hash`` — what publishing\n\
+    \         compares the draft against — and ``validation_error``, null when\n         the run was valid."
+- name: docsumo_cancel_workflow_execution
+  description: "Cancel a running workflow execution.\n\nArgs:\n    params: execution_id.\n\nReturns:\n\
+    \    JSON acknowledging the request, with the ``execution_id``.\n         Cancellation is not instant,\
+    \ so the run may still show as running\n         when this returns. Its final status is read with\n\
+    \         docsumo_get_workflow_execution_history or docsumo_list_workflow_executions."
+- name: docsumo_stop_all_test_runs
+  description: "Cancel every in-flight test run (drive jobs + executions) for a workflow.\n\nHandy to\
+    \ clear runaway or stuck test runs during the build/test loop.\n\nArgs:\n    params: workflow_id.\n\
+    \nReturns:\n    JSON with counts of canceled drive jobs and executions."
+- name: docsumo_list_workflow_test_cases
+  description: "List a workflow's test cases with latest run status and pending approvals.\n\nEach row\
+    \ shows the case's latest run state, and for a case parked at an\napproval gate, which block is waiting.\n\
+    \nArgs:\n    params: workflow_id, page, limit, q.\n\nReturns:\n    JSON with ``data.rows`` and ``pagination``\
+    \ with ``page``, ``limit``, ``total``, ``total_pages``, ``has_next`` and ``has_prev``, plus ``is_processing``\
+    \ —\n         true while any of them is still running."
+- name: docsumo_upload_drive_folder
+  description: "Create a drive folder and upload files — for TESTING/BUILDING a workflow only.\n\nThe\
+    \ workflow drive is the builder's scratch space for testing a workflow while\nyou build or correct\
+    \ it. Do NOT use it to ingest a real packet into a casetype:\nto add a real packet, use docsumo_upload_case_document\
+    \ (direct to the casetype,\nno drive). While iterating, prefer re-running an EXISTING drive packet/case\
+    \ with\ndocsumo_rerun_case rather than uploading a fresh packet each test.\n\nArgs:\n    params: workflow_id,\
+    \ folder_path, optional files, folder_name.\n\nReturns:\n    JSON with folder_id."
+- name: docsumo_run_drive_folder
+  description: "Run a drive folder as a workflow TEST case (builder testing only).\n\nThis processes an\
+    \ uploaded drive folder to validate the workflow during build/\ncorrection. It is NOT the way to ingest\
+    \ a real packet into a casetype — even\nwith mode=\"prod\" it goes through the test drive. For a real\
+    \ packet, use\ndocsumo_upload_case_document (direct to the casetype). To re-test after a change,\n\
+    prefer docsumo_rerun_case on an existing case over re-uploading.\n\nArgs:\n    params: workflow_id,\
+    \ folder_id, case_name, mode.\n\nReturns:\n    JSON with case_id, job_id, case_name, is_rerun."
+- name: docsumo_rerun_case
+  description: "Cheap re-run of an existing case reusing stored extraction.\n\n``block_id`` re-runs from\
+    \ that block, reusing what came before it. A partial\nrun does not satisfy the publish gate: run once\
+    \ without ``block_id`` before\npublishing, so a full-graph execution is recorded.\n\nArgs:\n    params:\
+    \ case_id, mode, optional block_id scope.\n\nReturns:\n    JSON with the new run's ``execution_id``.\
+    \ The run then proceeds in\n         the background, so it is not finished when this returns. Its\n\
+    \         status is read with docsumo_get_workflow_execution_history."
+- name: docsumo_create_workflow
+  description: "Create a new workflow draft with an initial graph.\n\nUse this to start a workflow from\
+    \ scratch. The graph must contain blocks and\nedges arrays in React Flow shape. To modify an existing\
+    \ workflow, use\ndocsumo_update_workflow_draft instead.\n\nArgs:\n    params: name, graph, and optional\
+    \ editor_state.\n\nReturns:\n    JSON with the created workflow including workflow_id and draft graph."
+- name: docsumo_list_workflows
+  description: "List workflows with pagination and optional filters.\n\nArgs:\n    params: page, limit,\
+    \ sort_by, status, casetype_id,\n        created_at, last_run_at filters.\n\nReturns:\n    JSON with\
+    \ ``data.workflows`` and ``pagination`` with ``page``, ``limit``, ``total``, ``total_pages``, ``has_next``\
+    \ and ``has_prev``. Each entry carries\n         ``workflow_id``, ``name``, ``status``, ``casetype_id``,\n\
+    \         ``is_publishable``, ``latest_published_version`` and\n         ``latest_execution``."
+- name: docsumo_get_workflow
+  description: "Read one workflow: the blocks it contains, how they connect, and its state.\n\nThis is\
+    \ what a given workflow is made of. For the catalog of block types a\nworkflow could use, read docsumo_list_workflow_blocks.\n\
+    \nPass ``summary`` to see which blocks a workflow has and how many edges join\nthem, without pulling\
+    \ every block's configuration.\n\nArgs:\n    params: workflow_id, and summary for the compact form.\n\
+    \nReturns:\n    The full form is the workflow with its ``draft.graph`` — every\n         block's config\
+    \ and code, and the edges between them. With\n         ``summary`` on it is instead a flat object:\
+    \ ``workflow_id``,\n         ``name``, ``status``, ``casetype_id``, ``is_publishable``,\n        \
+    \ ``latest_published_version``, ``latest_execution``, ``blocks`` as\n         ``{id, type, name}``,\
+    \ and ``edge_count``."
+- name: docsumo_update_workflow_draft
+  description: "Update a workflow draft graph, editor state, or name.\n\nPrimary tool for building workflows\
+    \ from an external agent. Fetch the current\ndraft with docsumo_get_workflow, modify blocks/edges,\
+    \ then save here.\n\nArgs:\n    params: workflow_id and optional graph,\n        editor_state, name.\n\
+    \nReturns:\n    JSON with the updated workflow data."
+- name: docsumo_edit_workflow_graph
+  description: "Apply block/edge-level edits to a draft graph without re-sending the whole graph.\n\n\
+    Prefer this for small changes (add an extractor, rewire an edge, delete a block):\nthe server reads\
+    \ the current draft, applies deletes -> updates -> adds, re-checks\nunique block ids and that no edge\
+    \ dangles, then saves. It refuses to write an\ninvalid result, so a bad partial edit never corrupts\
+    \ the draft. For a full\nreplacement, use docsumo_update_workflow_draft instead.\n\nArgs:\n    params:\
+    \ workflow_id and any of add_blocks,\n        update_blocks, delete_blocks, add_edges, delete_edges.\n\
+    \nReturns:\n    JSON summary of applied changes and resulting block/edge counts."
+- name: docsumo_duplicate_workflow
+  description: "Duplicate an existing workflow including its draft graph and code versions.\n\nArgs:\n\
+    \    params: workflow_id of the source workflow.\n\nReturns:\n    JSON with the new duplicated workflow."
+- name: docsumo_get_workflow_config
+  description: "Get configuration for a workflow (triggers, casetype linkage, etc.).\n\nArgs:\n    params:\
+    \ workflow_id.\n\nReturns:\n    JSON with ``data.workflow_id``, the ``casetype_id`` it feeds, and\n\
+    \         ``email_config`` — the live and test addresses documents can be\n         emailed to. The\
+    \ account's API keys are stripped before this\n         returns; the trigger screen is where someone\
+    \ who needs one goes."
+- name: docsumo_run_workflow_trigger
+  description: "Make the next document that arrives by email or API run the draft as a test.\n\nThe run\
+    \ starts when that document arrives, not when this returns; the test\nemail address and API key are\
+    \ in the workflow's configuration.\n\nArgs:\n    params: workflow_id and trigger_type.\n\nReturns:\n\
+    \    JSON with ``data.status`` (\"active\" once armed), ``data.workflow_id``\n         and ``data.trigger_type``."
+- name: docsumo_publish_workflow
+  description: "Publish a workflow version after a successful test run (is_publishable=true).\n\nArgs:\n\
+    \    params: workflow_id and optional version_name.\n\nReturns:\n    JSON with published version metadata."
+- name: docsumo_check_workflow_publishable
+  description: "Diagnose whether a workflow can be published, and if not, exactly why.\n\nPublishing requires\
+    \ the current draft graph to hash to the same value as the\nlast successful full run. The bare ``is_publishable``\
+    \ flag hides the reason;\nthis reports the concrete causes — no full run yet, leftover inline code\
+    \ on\ncode-bearing blocks, or a draft that differs from the last run in its blocks,\ntheir configuration,\
+    \ their edges or their order — with what to do about each.\nRun it when a publish is being refused\
+    \ and the reason is not obvious.\n\nArgs:\n    params: workflow_id.\n\nReturns:\n    A flat object\
+    \ with ``workflow_id``, ``publishable``,\n         ``latest_execution``, and ``reasons`` and ``suggestions``\
+    \ as\n         lists — one entry per cause found, in plain words. When the draft\n         differs\
+    \ from the last run, ``block_diffs`` names each block added,\n         removed, retyped or with changed\
+    \ config keys, and ``edge_diffs``\n         each edge added, removed or rewired."
+- name: docsumo_list_workflow_versions
+  description: "List published version history for a workflow.\n\nArgs:\n    params: workflow_id.\n\n\
+    Returns:\n    JSON with ``data.versions``, newest first. A workflow never\n         published returns\
+    \ an empty list."
+- name: docsumo_get_workflow_version
+  description: "Get one published workflow version including its frozen graph.\n\nArgs:\n    params: workflow_id\
+    \ and version_id.\n\nReturns:\n    JSON with version metadata and graph."
+- name: docsumo_restore_workflow_draft
+  description: "Recover a corrupted draft from a published version.\n\nArgs:\n    params: workflow_id\
+    \ and optional version_id.\n\nReturns:\n    JSON with restored_from, blocks count, and pinned code\
+    \ blocks count."
+- name: docsumo_update_workflow_approvals
+  description: "Approve or reject a case waiting at a wait_approval block.\n\nResolves a case parked at\
+    \ a `wait_approval` gate: `approved=true` takes the\nApprove branch, `false` the Reject branch. Find\
+    \ waiting cases + their block ids\nwith docsumo_list_workflow_test_cases.\n\nArgs:\n    params: workflow_id,\
+    \ block_id, approved, optional reason, case_id.\n\nReturns:\n    JSON confirmation of the approval\
+    \ decision."
+- name: docsumo_list_workflow_templates
+  description: "List available workflow templates to start a new workflow from.\n\nArgs:\n    params:\
+    \ no parameters.\n\nReturns:\n    JSON with a ``data`` list, each template carrying ``id``, ``title``,\n\
+    \         ``description``, ``category``, ``tags`` and ``popular_rank``."
+- name: docsumo_create_workflow_from_template
+  description: "Create a new workflow from a template, with its casetype when the template defines one.\n\
+    \nA fast alternative to building from scratch. With `trigger_workflow=true` the\ntemplate's bundled\
+    \ sample files are uploaded and run too.\n\nArgs:\n    params: workflow_template_id, trigger_workflow.\n\
+    \nReturns:\n    JSON with the new workflow's ``workflow_id`` and ``casetype_id``,\n         which\
+    \ is null for a template that defines no case type."
+- name: docsumo_process_workflow_agent
+  description: "Send a turn to the workflow builder.\n\nReturns frontend actions (addBlock, addEdge, testFlow,\
+    \ etc.) meant for the\nReact Flow UI. Prefer direct graph mutation via docsumo_update_workflow_draft\n\
+    when building workflows from an external MCP agent.\n\nArgs:\n    params: conversation_history,\n\
+    \        current_workflow_state, and optional context fields.\n\nReturns:\n    JSON with user_facing_response\
+    \ and actions array."
+- name: docsumo_get_workflow_agent_run_status
+  description: "Check whether a workflow-agent run is currently in progress.\n\nArgs:\n    params: workflow_id.\n\
+    \nReturns:\n    JSON with ``data.running``."
+- name: docsumo_cancel_workflow_agent_run
+  description: "Cancel an in-flight workflow-agent run.\n\nArgs:\n    params: workflow_id.\n\nReturns:\n\
+    \    JSON confirmation."
+- name: docsumo_get_workflow_agent_conversation
+  description: "Get checkpointed conversation history for a workflow from workflow-agent.\n\nArgs:\n \
+    \   params: workflow_id.\n\nReturns:\n    JSON with a ``data`` list of messages, oldest first, each\
+    \ with its\n         ``msg``, ``type`` (who sent it) and any ``files``."
+- name: docsumo_delete_workflow_agent_conversation
+  description: "Delete checkpointed conversation history for a workflow.\n\nArgs:\n    params: workflow_id.\n\
+    \nReturns:\n    JSON confirmation."
+- name: docsumo_get_account_user
+  description: "Who the caller is, and which account and plan they are on.\n\nA credential maps to exactly\
+    \ one account, so read this when results look\nempty or do not match what the user sees on screen\
+    \ — usually the credential\nbelongs to a different account than expected rather than anything failing.\n\
+    For the document allowance and how much of it is used, use\ndocsumo_get_user_detail.\n\nReturns:\n\
+    \    JSON under ``data.user`` with the person's email and name, their\n         role, the organisation\
+    \ and its plan, and the document types they\n         are authorised for."
+- name: docsumo_get_account_config
+  description: "Account-wide settings: plan, retention, feature flags and the webhook in use.\n\nReturns:\n\
+    \    JSON with ``data`` carrying ``account_type`` and ``plan_category``,\n         ``del_doc_after``\
+    \ (how long documents are kept), ``flags`` and\n         ``feature_flags``, ``inactivity_timeout``,\
+    \ ``temp_token_duration``,\n         ``send_token_in_review_url``, and — when a webhook is set —\n\
+    \         ``webhook_url``, its scheme and host only. The credentials upstream\n         includes are\
+    \ stripped before this returns."
+- name: docsumo_update_account_settings
+  description: "Update the current user's display name.\n\nArgs:\n    params: New full_name value.\n\n\
+    Returns:\n    JSON with updated user details."
+- name: docsumo_update_config_flags
+  description: "Update boolean account configuration flags.\n\nArgs:\n    params: Flags to update (e.g.\
+    \ straight_through_processing).\n\nReturns:\n    JSON success response."
+- name: docsumo_update_del_doc_after
+  description: "Set how long processed documents are retained before deletion.\n\nArgs:\n    params: Retention\
+    \ period (e.g. \"never\", \"7days\", \"180days\").\n\nReturns:\n    JSON with the account configuration\
+    \ as it now stands."
+- name: docsumo_update_temp_token_duration
+  description: "Set the expiry duration for temporary review URL tokens.\n\nArgs:\n    params: Duration\
+    \ in days.\n\nReturns:\n    JSON with the account configuration as it now stands."
+- name: docsumo_update_review_url_token
+  description: "Enable or disable including auth tokens in review URLs.\n\nArgs:\n    params: send_token_in_review_url\
+    \ boolean.\n\nReturns:\n    JSON with the account configuration as it now stands."
+- name: docsumo_list_account_members
+  description: "List all users (members) in the account with their details.\n\nReturns user_id, email,\
+    \ full_name, role, and authorized document types\nfor each member. Supports filtering by name and\
+    \ pagination.\n\nArgs:\n    params: Optional name filter and pagination.\n\nReturns:\n    JSON ``{\"\
+    data\": {\"users\": [...], \"limit\": N, \"offset\": N,\n         \"total\": N}}``. Each user carries\
+    \ ``user_id``, ``email``,\n         ``full_name``, ``role``, and ``authorized_doc_types_count`` —\
+    \ how\n         many document types they may use. ``total`` counts every member,\n         not just\
+    \ this page."
+- name: docsumo_add_member
+  description: "Invite a new member to the account.\n\nRequires admin or owner role. When ``authorized_doc_types``\
+    \ is left empty,\nthe member is granted access to ALL document types in the account by default.\n\n\
+    Args:\n    params: Member email, password, name, role, and doc-type access.\n\nReturns:\n    JSON\
+    \ with created member details."
+- name: docsumo_edit_member
+  description: "Update an existing account member's role, name, password, or doc-type access.\n\nArgs:\n\
+    \    params: Member email and fields to update.\n\nReturns:\n    JSON success response."
+- name: docsumo_delete_member
+  description: "Remove a member from the account.\n\nCannot delete yourself or the primary owner. Requires\
+    \ admin or owner role.\n\nArgs:\n    params: user_id of the member to remove.\n\nReturns:\n    JSON\
+    \ success response."
+- name: docsumo_get_users_list
+  description: "List account members. Prefer docsumo_list_account_members.\n\nArgs:\n    params: Optional\
+    \ name filter and pagination.\n\nReturns:\n    JSON ``{\"data\": {\"users\": [...], \"limit\": N,\
+    \ \"offset\": N,\n         \"total\": N}}``. Each user carries ``user_id``, ``email``,\n         ``full_name``,\
+    \ ``role``, and ``authorized_doc_types_count`` — how\n         many document types they may use. ``total``\
+    \ counts every member,\n         not just this page."
+- name: docsumo_get_webhook_config
+  description: "Retrieve the organization's webhook URL and which authentication it uses.\n\nThe credentials\
+    \ themselves are never returned. Set them with\ndocsumo_update_webhook_url.\n\nReturns:\n    JSON\
+    \ with ``data.webhook_url``: ``url``, and ``header.key`` when a\n         custom header is configured.\
+    \ ``url`` shows only its scheme and\n         host, with anything after them as ``***``: a webhook\
+    \ URL often\n         carries its secret in the path or query. An account with no\n         webhook\
+    \ answers with an empty ``webhook_url``."
+- name: docsumo_update_webhook_url
+  description: "Change the organization's webhook callback URL or its authentication.\n\nOnly the fields\
+    \ given change; the rest keep their stored values, credentials\nincluded, so changing the URL does\
+    \ not remove its authentication.\n\nArgs:\n    params: The webhook fields to change.\n\nReturns:\n\
+    \    JSON with the webhook configuration as now stored, in the same\n         shape the webhook configuration\
+    \ read returns."
+- name: docsumo_get_webhook_api_settings
+  description: "Retrieve per-doc-type webhook/API payload settings.\n\nPer document type, whether the\
+    \ webhook payload carries a link to the file\nand whether it carries the file's contents inline.\n\
+    \nReturns:\n    JSON with ``include_in_response`` — the account-wide file link and\n         inline-contents\
+    \ toggles — plus ``include_in_response_default``,\n         the per-type toggle nearly every type\
+    \ has, and\n         ``active_doc_types``, only the types that differ from it.\n         ``active_doc_types_count``\
+    \ is how many types the toggle covers."
+- name: docsumo_update_webhook_api_settings
+  description: "Choose what a webhook or API response carries for each document type.\n\naction=\"untick\"\
+    \ clears every document type, not the ones named.\n\nArgs:\n    params: Doc types and toggle values.\n\
+    \nReturns:\n    JSON with updated active_doc_types and include_in_response."
+- name: docsumo_list_activity_logs
+  description: "List account activity log entries shown on the All Activity page.\n\nMirrors the ``/allactivity``\
+    \ screen. Use ``activity_type`` to pick a tab:\n'all', 'document', 'user', 'credit', or 'webhook'.\
+    \ Supports a search of the\nactivity text, date range, user, action and mode filters, with pagination\n\
+    (newest first by default).\n\nArgs:\n    params: Activity type, filters, and pagination.\n\nReturns:\n\
+    \    JSON ``{\"data\": {\"logs\": [...], \"limit\": N, \"offset\": N,\n         \"total\": N}}`` plus\
+    \ ``_pagination`` with ``has_more`` and\n         ``next_offset``. Each entry carries the ``activity``\
+    \ text, its\n         ``date_time``, and the acting user's ``name``; signed in with a\n         user\
+    \ session rather than an API key, also its ``type`` and ``mode``."
+- name: docsumo_get_activity_log_counts
+  description: "Get activity log counts grouped by type.\n\nReturns the per-tab badge counts used by the\
+    \ All Activity page: total\n('all') plus 'user', 'document', 'credit', and 'webhook'. Accepts the\
+    \ same\nsearch, date, user, action, and mode filters as the activity feed.\n\nArgs:\n    params: Optional\
+    \ filters.\n\nReturns:\n    JSON with a ``counts`` object keyed by activity type."
+- name: docsumo_model_hub_check_model_status
+  description: "Check whether a pretrained model is still available to add.\n\nArgs:\n    params: doc_type\
+    \ — pretrained model value (e.g. invoice).\n\nReturns:\n    JSON confirming the model is not on the\
+    \ account yet. If it is\n         already there, or the account is not entitled to it, this fails\n\
+    \         instead and the message says which."
+- name: docsumo_model_hub_enable_model
+  description: "Add a pretrained model to the account — the Model Hub \"Add\" action.\n\nMirrors the product's\
+    \ one-step Add: by default (upload_sample=true) it enables the\ndocument type AND adds its bundled\
+    \ sample. These run as TWO steps so the enable is\nnever lost if the sample fails — the model is enabled\
+    \ first, then the sample is\nuploaded best-effort. The result includes a `sample_upload` field: {\"\
+    status\":\n\"success\"} or {\"status\": \"failed\", \"warning\": ...} when the sample couldn't be\n\
+    added. Requires admin role.\n\nIMPORTANT:\n- service_id is the NUMERIC catalog id (the `id` field\
+    \ from\n  docsumo_model_hub_list_pretrained_models, e.g. 1045), NOT the value/doc_type\n  string.\
+    \ Passing the value (e.g. \"us_cheque\") returns HTTP 500 because the\n  backend resolves it with\
+    \ int(id).\n- The sample-upload route rejects API-key auth and returns HTTP 500, so under an\n  API-key\
+    \ MCP connection the sample step usually lands in `sample_upload.failed`\n  (the enable still succeeds).\
+    \ Add the sample from the web UI, or upload your own\n  with docsumo_upload_document.\n- Add only\
+    \ models NOT already on the account. Re-adding an already-enabled model\n  errors server-side. Check\
+    \ first with docsumo_model_hub_check_model_status (by\n  value) or docsumo_model_hub_list_account_models.\n\
+    \nArgs:\n    params: service_id (numeric id), can_upload, optional title, upload_sample\n        (default\
+    \ true = enable + best-effort bundled sample), settings.\n\nReturns:\n    JSON with ``data``, the\
+    \ enabled model's catalog entry, plus a\n         ``sample_upload`` status."
+- name: docsumo_model_hub_duplicate_model
+  description: "Duplicate an existing document type — the way to RE-ADD an already-enabled model.\n\n\
+    The enable endpoint rejects a model that is already on the account (re-add errors\nserver-side). To\
+    \ get another copy of it, duplicate it: this clones the document\ntype into a NEW one and, with upload_sample=true\
+    \ (default), also adds the bundled\nsample document. Mirrors the product's \"Duplicate\" action. Requires\
+    \ admin role.\n\nNote: doc_type here is the source type's VALUE/doc_type string (from\ndocsumo_model_hub_list_account_models\
+    \ `value`), NOT the numeric id used by\ndocsumo_model_hub_enable_model.\n\nArgs:\n    params: doc_type\
+    \ (source value), optional title, upload_sample (default true),\n        settings.\n\nReturns:\n \
+    \   JSON with ``data.doc_type`` and ``data.title`` of the new type,\n         and ``data.document``,\
+    \ its catalog entry."
+- name: docsumo_model_hub_validate_title
+  description: "Check a document type title is not already taken.\n\nRun before docsumo_model_hub_create_custom_model:\
+    \ a title already taken is\nnot refused there but renamed with a number (\"Invoice 1\"), which the\
+    \ user\ndid not ask for.\n\nArgs:\n    params: doc_type, title, optional validate_multiple.\n\nReturns:\n\
+    \    JSON confirming the title is free. A title already in use fails\n         instead, naming the\
+    \ clash."
+- name: docsumo_model_hub_create_custom_model
+  description: "Create an empty custom document type (Custom Document Type card in Model Hub).\n\nRequires\
+    \ admin role. The type comes back with no sections or fields; give it\na schema with docsumo_add_doctype_fields.\n\
+    \nArgs:\n    params: title for the new custom document type.\n\nReturns:\n    JSON with ``doc_type``\
+    \ — the identifier every other tool takes —\n         plus the ``title`` it was created under (renamed\
+    \ with a number when\n         the one asked for was taken) and ``document``, the new\n         type's\
+    \ own catalog entry. ``placeholder`` appears only when the\n         type could not be emptied: it\
+    \ was still created, and the section it\n         carries has to be deleted before fields are added."
+- name: docsumo_model_hub_upload_sample
+  description: "Re-upload the bundled sample document to an ALREADY-enabled document type.\n\nAdds the\
+    \ sample file bundled with the pretrained model (POST\nthe sample-upload route). For a NEW add you\
+    \ do not need this —\ndocsumo_model_hub_enable_model with upload_sample=true already enables and\n\
+    uploads the sample in one call. Use this only to (re)place the sample on a type\nthat is already on\
+    \ the account.\n\nNote: service_id is the NUMERIC catalog id (not the value). The upload routes the\n\
+    sample using the request token; it only works for\nmodels that have a bundled sample file and are\
+    \ already enabled.\n\nArgs:\n    params: service_id — numeric catalog model id.\n\nReturns:\n    JSON\
+    \ success response."
+- name: docsumo_model_hub_list_pretrained_models
+  description: "List pretrained models available in the AI Model Hub catalog.\n\nEverything the account\
+    \ could add, whether or not it already has. For what it\nalready uses, see docsumo_get_document_types.\n\
+    \nArgs:\n    params: Optional mode (prod or test).\n\nReturns:\n    JSON with a ``data`` list, each\
+    \ entry carrying ``value`` (the\n         doc_type string used to add it), numeric ``id``, ``title``,\n\
+    \         ``description``, ``category`` and ``tag_category``. A\n         ``popular_rank`` appears\
+    \ only on the models the hub features."
+- name: docsumo_model_hub_list_account_models
+  description: "List the account's document types as the Model Hub sees them.\n\nThe same active types\
+    \ docsumo_get_document_types returns, carrying plan and\ncatalog metadata instead of document counts.\
+    \ Use that one for counts and the\n``doc_type`` other tools ask for; use docsumo_model_hub_list_pretrained_models\n\
+    for types the account has not added yet.\n\nAn account can hold several hundred types, so pass ``q``\
+    \ to search by name\nrather than paging for one.\n\nArgs:\n    params: mode, optional q search, limit\
+    \ and offset.\n\nReturns:\n    JSON with a ``data`` list of the account's types, each carrying\n \
+    \        ``user_value`` (the doc_type string), numeric ``id``, ``title``,\n         ``description``,\
+    \ ``category``, ``can_upload``, ``is_authorized``\n         and ``plan``, plus ``total`` — every type\
+    \ matching ``q``, not just\n         this page. No document counts — use docsumo_get_document_types\
+    \ for\n         those."
+- name: docsumo_list_tables
+  description: "List the organization's tables with their columns and row counts.\n\nMirrors the ``/tables``\
+    \ screen. Two kinds exist: ``reference`` tables hold\nlookup data (GL codes, currencies, vendor categories)\
+    \ that workflows match\nagainst, and ``entity`` tables hold business records (vendors, customers,\n\
+    borrowers) that workflow runs link to cases. Start here to discover a\n``table_id`` and its ``column_id``\
+    \ values before reading or filtering rows.\n\nArgs:\n    params: Optional kind and name filters, and\
+    \ pagination.\n\nReturns:\n    JSON ``{\"data\": {\"tables\": [...], \"total\": N, \"offset\": N,\
+    \ \"limit\": N}}``,\n         newest-modified first. Each table carries ``table_id``, ``name``,\n\
+    \         ``description``, ``kind`` (\"reference\" or \"entity\"), ``row_count``,\n         ``display_column``\
+    \ (the ``column_id`` that titles a record, may be\n         null), ``created_by`` (``{full_name}``),\
+    \ ``created_at_iso``,\n         ``modified_at_iso``, and ``columns``: a list of ``{column_id, name,\n\
+    \         position, type, is_primary_key, is_unique, is_required, is_hidden,\n         choices, source_table_id}``.\
+    \ Column ``type`` is one of text, number,\n         date, boolean, choice, or linked_record; ``choices``\
+    \ lists the options\n         for a choice column and ``source_table_id`` names the table a\n    \
+    \     linked_record column points at. ``total`` counts all matching tables,\n         not just this\
+    \ page."
+- name: docsumo_get_table_rows
+  description: "Read a page of one table's rows, optionally searched, filtered and sorted.\n\nThis is\
+    \ how to answer \"is X in this table\" and \"which rows match Y\". Pass\n``q`` for a typo-tolerant\
+    \ search over every cell, or ``conditions`` for exact\ncomparisons on specific columns. Filter rather\
+    \ than page: this answers\nlookups, it is not a way to export a whole table.\n\nArgs:\n    params:\
+    \ The table, an optional search term, optional\n        column conditions, sort, and pagination.\n\
+    \nReturns:\n    JSON ``{\"data\": {\"rows\": [...], \"total\": N, \"offset\": N, \"limit\": N,\n \
+    \        \"search\": bool, \"columns\": [...]}}``. Each row carries ``row_id``,\n         ``table_id``,\
+    \ ``cells_by_name`` (its values keyed by a normalized\n         column name, with empty cells omitted),\
+    \ ``source`` (\"manual\",\n         \"csv\", \"workflow\" or \"api\"), and ``created_at`` / ``modified_at``\n\
+    \         as Unix epoch seconds. A linked_record cell in ``cells_by_name``\n         is the linked\
+    \ row's id; with ``resolve_links`` on, the row also\n         carries ``linked_records`` — ``{\"row_id\"\
+    : ..., \"display\": ...}``\n         per linked column, keyed by its ``column_id``, ``display`` null\
+    \ when\n         the linked record has since been deleted. ``columns`` is the\n         table's column\
+    \ list, echoed so a value can be matched to its\n         ``column_id`` without another call. ``total``\
+    \ counts every matching\n         row, not just this page.\n         ``search`` is true when ``q``\
+    \ ran on the search index, and false both\n         when no ``q`` was given and when the index was\
+    \ unavailable and a\n         slower pattern scan answered it instead — so it is not a health\n  \
+    \       signal on its own. An unknown or deleted table is an error:\n         TABLE_NOT_FOUND."
+- name: docsumo_get_table_record
+  description: "Get one table row and every case linked to it.\n\nMirrors the record page at ``/tables/{table_id}/record/{row_id}``.\
+    \ Use it to\nanswer \"which cases involve this vendor\" and \"what has this record been used\nfor\"\
+    . Only ``entity`` table rows are ever linked to cases; a ``reference``\ntable row comes back with\
+    \ an empty ``cases`` list.\n\nArgs:\n    params: The table and the row.\n\nReturns:\n    JSON ``{\"\
+    data\": {\"row\": {...}, \"cases\": [...], \"columns\": [...]}}``.\n         ``row`` is the same shape\
+    \ as a row from docsumo_get_table_rows, except that\n         linked_record cells are NOT resolved\
+    \ here — they hold the raw\n         ``row_id``. To turn one into a readable record, call this tool\
+    \ again\n         with that ``row_id`` and the ``source_table_id`` of its column (from\n         ``columns``).\
+    \ ``cases`` is newest-first, each with ``case_id``,\n         ``case_name``, ``casetype_id``, ``stage_id``,\
+    \ ``stage``\n         (``{id, label, color}``), ``workflow_state``, ``created_at_iso``,\n        \
+    \ ``modified_at_iso``, and ``documents``: that case's documents as\n         ``{doc_id, title, type,\
+    \ type_title, status, review_url,\n         suggested_type, err_message, stp, created_at_iso, modified_at_iso}``.\n\
+    \         A case whose link outlived the case itself is dropped, so ``cases``\n         can be shorter\
+    \ than the number of links. ``columns`` is the table's\n         column list, for matching a value\
+    \ to its ``column_id``. An unknown\n         table is TABLE_NOT_FOUND and an unknown row is ROW_NOT_FOUND."
+- name: docsumo_get_case_linked_records
+  description: "Get the entity records linked to a case.\n\nMirrors the Linked Records card on Case Overview:\
+    \ which vendor, customer or\nborrower this case is about. Use it when a question starts from the case;\n\
+    use docsumo_get_table_record when it starts from the record.\n\nArgs:\n    params: The case.\n\nReturns:\n\
+    \    JSON ``{\"data\": {\"links\": [...]}}`` — every link, unpaginated. Each\n         link carries\
+    \ ``table_id``, ``table_name``, ``row_id``, ``entity``\n         (the linked row's cells keyed by\
+    \ COLUMN NAME, ready to show),\n         ``case_id``, ``casetype_id``, ``linked_by``\n         (``{type,\
+    \ user_id, workflow_id, case_id}`` — ``type`` is \"user\",\n         \"workflow\" or \"api\"), ``match_meta``\
+    \ (``{key_column_id,\n         match_score}``, present when a workflow matched the record\n      \
+    \   automatically), and ``created_at`` as Unix epoch seconds. A link\n         whose table or row\
+    \ has since been deleted is dropped, so a case with\n         links can still return an empty list.\
+    \ An unknown case is not an\n         error — it returns no links."
+- name: docsumo_search_tables
+  description: "Search row data across every table at once, grouped by table.\n\nUse this when the value\
+    \ is known but the table is not — \"do we have this\nvendor anywhere\", \"which table holds this GL\
+    \ code\". When the table IS known,\ndocsumo_get_table_rows with ``q`` is the better call: it can also\
+    \ filter and sort.\n\nArgs:\n    params: The search text, an optional kind filter, and\n        pagination.\n\
+    \nReturns:\n    JSON ``{\"data\": {\"results\": [...], \"total\": N, \"offset\": N,\n         \"limit\"\
+    : N, \"search\": bool}}``. ``results`` groups the matching rows\n         by table, in relevance order:\
+    \ each group is ``{table_id, name, kind,\n         rows: [...]}`` and each row has the same shape\
+    \ as a row from\n         docsumo_get_table_rows, with linked_record cells left as raw ``row_id``s.\n\
+    \         ``total`` counts every matching row across all tables, not just this\n         page. ``search``\
+    \ reports whether the search index was used or a\n         slower pattern scan replaced it; the fallback\
+    \ has no relevance\n         ranking and no typo tolerance. A term that matches nothing returns an\n\
+    \         empty ``results`` with ``total: 0`` and no ``search`` key."
+- name: docsumo_list_database_tables
+  description: "List the account's Database Tables — the CSVs behind dropdown options.\n\nMirrors Settings\
+    \ → Database Tables. Each table is an uploaded CSV whose rows\nsupply the options a ``drop_down``\
+    \ field offers and which workflow lookup\nblocks match against. Start here to find a ``dd_id``. This\
+    \ is a different\nscreen from the reference and entity tables in docsumo_list_tables.\n\nArgs:\n \
+    \   params: pagination.\n\nReturns:\n    JSON ``{\"data\": {\"dd_data\": [...], \"limit\": N, \"offset\"\
+    : N, \"total\": N}}``.\n    Each entry carries ``dd_id``, ``title``, ``headers`` (the column names),\n\
+    \    ``uploaded_by`` and ``created_at_iso`` / ``modified_at_iso``. ``total``\n    counts every table\
+    \ on the account, not just this page."
+- name: docsumo_get_database_table_rows
+  description: "Read a page of one Database Table's rows, optionally searched.\n\nThis answers \"is this\
+    \ GL code in our table\" and \"what does this table hold\".\nFilter with ``q`` rather than paging\
+    \ through everything.\n\nArgs:\n    params: the table, an optional search, and pagination.\n\nReturns:\n\
+    \    JSON ``{\"data\": {\"data\": [...], \"limit\": N, \"offset\": N, \"total\": N}}``.\n    Each\
+    \ row carries the table's columns plus the ``id`` the server assigned\n    it. A table id that matches\
+    \ nothing returns no rows rather than an error."
+- name: docsumo_get_database_table_columns
+  description: "List one Database Table's column names.\n\nUse before searching or writing rows, since\
+    \ both are keyed by column name.\n\nArgs:\n    params: the table.\n\nReturns:\n    JSON with a ``data``\
+    \ list of ``{id, label}``, one per column, where both\n    are the column name. A trailing ``{\"id\"\
+    : 1001000, \"label\": \"None\"}`` is\n    the screen's \"no column\" choice, not a column of the table."
+- name: docsumo_download_database_table
+  description: "Get a download link for one Database Table as CSV.\n\nArgs:\n    params: the table, and\
+    \ what to download.\n\nReturns:\n    JSON with a download URL for the generated CSV. One table per\
+    \ call."
+- name: docsumo_create_database_table
+  description: "Create a Database Table from rows supplied inline.\n\nThe rows are written as the CSV\
+    \ the server requires, so no file is needed.\nRequires an admin role. Very large tables are capped\
+    \ server-side.\n\nArgs:\n    params: title, columns, rows.\n\nReturns:\n    JSON confirming success.\
+    \ It does not carry the new table's ``dd_id`` —\n    read it back with docsumo_list_database_tables."
+- name: docsumo_append_database_table_rows
+  description: "Add rows to a Database Table, leaving the existing ones in place.\n\nRequires an admin\
+    \ role.\n\nArgs:\n    params: the table and the rows.\n\nReturns:\n    JSON whose ``message`` says\
+    \ how many rows were added. When the table\n    would exceed the server's row cap only the rows that\
+    \ fit are added, and\n    the message says so — so it can succeed having added fewer than asked."
+- name: docsumo_add_database_table_row
+  description: "Append one empty row to a Database Table, to be filled in cell by cell.\n\nTo add rows\
+    \ with values already in them, use\ndocsumo_append_database_table_rows instead. Requires an admin\
+    \ role.\n\nArgs:\n    params: the table.\n\nReturns:\n    JSON confirming success."
+- name: docsumo_update_database_table_cell
+  description: "Set one cell of one row in a Database Table.\n\nRequires an admin role.\n\nArgs:\n   \
+    \ params: the table, the row, the column and the new value.\n\nReturns:\n    JSON confirming success.\
+    \ A column the table does not have is rejected."
+- name: docsumo_delete_database_table_row
+  description: "Delete one row from a Database Table. Requires an admin role.\n\nArgs:\n    params: the\
+    \ table and the row.\n\nReturns:\n    JSON confirming success."
+- name: docsumo_delete_database_table_rows
+  description: "Delete every row a search matches, or every row in the table.\n\nOmitting ``q`` empties\
+    \ the table, keeping the table and its columns.\nRequires an admin role.\n\nArgs:\n    params: the\
+    \ table, and optionally which rows.\n\nReturns:\n    JSON confirming success. It does not report how\
+    \ many rows were removed."
+- name: docsumo_rename_database_table
+  description: "Rename a Database Table. Requires an admin role.\n\nArgs:\n    params: the table and the\
+    \ new title.\n\nReturns:\n    JSON confirming success."
+- name: docsumo_delete_database_tables
+  description: "Delete whole Database Tables and their rows.\n\nAny field whose dropdown was sourced from\
+    \ a deleted table loses that source.\nRequires an admin role.\n\nArgs:\n    params: the tables.\n\n\
+    Returns:\n    JSON confirming success. Tables belonging to another account are skipped\n    rather\
+    \ than reported, so a success does not mean every id was deleted."
 tools_source: live tools/list via initialize handshake, 2026-09-11 (signals/audit_mcp_authorship.py --probe)
 authorship: provider
 tool_quality:
